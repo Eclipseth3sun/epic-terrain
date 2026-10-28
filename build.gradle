@@ -1,0 +1,95 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+repositories {
+}
+
+loom {
+	// Keeps client-only code in src/client so it can't leak into a dedicated server.
+	splitEnvironmentSourceSets()
+
+	accessWidenerPath = file('src/main/resources/epicterrain.accesswidener')
+
+	runs {
+		// Forward -Depicterrain.* options (the Earth world's dials, e.g. -Depicterrain.earth.cell=64) to the game, as the preview task does.
+		configureEach {
+			System.properties.each { k, v ->
+				if (k.toString().startsWith('epicterrain.')) {
+					property k.toString(), v.toString()
+				}
+			}
+		}
+	}
+
+	mods {
+		"epicterrain" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+	useJUnitPlatform {
+		excludeTags 'preview'
+	}
+	systemProperty 'epicterrain.resourcesDir', file('src/main/resources').absolutePath
+	maxHeapSize = '2g'
+	testLogging.showStandardStreams = true
+}
+
+// Renders height/biome maps of the generated terrain to build/preview so worldgen changes can be
+// checked without launching the game. Run with: ./gradlew preview
+tasks.register('preview', Test) {
+	group = 'verification'
+	description = 'Renders terrain preview images to build/preview'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'preview'
+	}
+	outputs.upToDateWhen { false }
+	systemProperty 'java.awt.headless', 'true'
+	systemProperty 'epicterrain.resourcesDir', file('src/main/resources').absolutePath
+	systemProperty 'epicterrain.previewDir', layout.buildDirectory.dir('preview').get().asFile.absolutePath
+	maxHeapSize = '3g'
+	testLogging.showStandardStreams = true
+	// Forward -Depicterrain.* options (seed, view centre, which preset, ...) to the test JVM.
+	System.properties.each { k, v ->
+		if (k.toString().startsWith('epicterrain.')) {
+			systemProperty k.toString(), v.toString()
+		}
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

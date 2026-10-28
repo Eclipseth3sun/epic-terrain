@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.epicterrain.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"NoiseBasedAquiferMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

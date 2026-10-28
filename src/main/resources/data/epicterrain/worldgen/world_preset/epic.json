@@ -1,0 +1,532 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "epicterrain:overworld",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "epicterrain:epic_multi_noise",
+          "base": {
+            "preset": "minecraft:overworld"
+          },
+          "zones": [
+            {
+              "biome": "epicterrain:epic_range_peaks",
+              "replaces": "#epicterrain:replaced_by_epic_peaks"
+            },
+            {
+              "biome": "epicterrain:epic_wall_peaks",
+              "replaces": "#epicterrain:replaced_by_epic_peaks"
+            },
+            {
+              "variants": [
+                {
+                  "from": "minecraft:snowy_plains",
+                  "to": "epicterrain:foothills_cold"
+                },
+                {
+                  "from": "minecraft:snowy_taiga",
+                  "to": "epicterrain:foothills_cold"
+                },
+                {
+                  "from": "minecraft:snowy_slopes",
+                  "to": "epicterrain:foothills_cold"
+                },
+                {
+                  "from": "minecraft:ice_spikes",
+                  "to": "epicterrain:foothills_cold"
+                },
+                {
+                  "from": "minecraft:grove",
+                  "to": "epicterrain:foothills_cold"
+                },
+                {
+                  "from": "minecraft:plains",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:sunflower_plains",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:flower_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:birch_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:old_growth_birch_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:dark_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:dappled_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:meadow",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:cherry_grove",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:pale_garden",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:taiga",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:old_growth_pine_taiga",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:old_growth_spruce_taiga",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:windswept_hills",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:windswept_forest",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:windswept_gravelly_hills",
+                  "to": "epicterrain:foothills_temperate"
+                },
+                {
+                  "from": "minecraft:desert",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:savanna",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:savanna_plateau",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:windswept_savanna",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:badlands",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:eroded_badlands",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:wooded_badlands",
+                  "to": "epicterrain:foothills_dry"
+                },
+                {
+                  "from": "minecraft:jungle",
+                  "to": "epicterrain:foothills_wet"
+                },
+                {
+                  "from": "minecraft:sparse_jungle",
+                  "to": "epicterrain:foothills_wet"
+                },
+                {
+                  "from": "minecraft:bamboo_jungle",
+                  "to": "epicterrain:foothills_wet"
+                },
+                {
+                  "from": "minecraft:swamp",
+                  "to": "epicterrain:foothills_wet"
+                },
+                {
+                  "from": "minecraft:mangrove_swamp",
+                  "to": "epicterrain:foothills_wet"
+                }
+              ]
+            },
+            {
+              "variants": [
+                {
+                  "from": "minecraft:stony_shore",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:swamp",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:mangrove_swamp",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:snowy_slopes",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:snowy_plains",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:snowy_beach",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:windswept_gravelly_hills",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:grove",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:windswept_hills",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:snowy_taiga",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:windswept_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:taiga",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:plains",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:meadow",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:beach",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:old_growth_spruce_taiga",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:flower_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:birch_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:dark_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:pale_garden",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:savanna_plateau",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:savanna",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:jungle",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:badlands",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:desert",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:wooded_badlands",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:jagged_peaks",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:stony_peaks",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:frozen_river",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:river",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:ice_spikes",
+                  "to": "epicterrain:epic_frozen_river"
+                },
+                {
+                  "from": "minecraft:dappled_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:old_growth_pine_taiga",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:sunflower_plains",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:old_growth_birch_forest",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:sparse_jungle",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:bamboo_jungle",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:eroded_badlands",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:windswept_savanna",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:cherry_grove",
+                  "to": "epicterrain:epic_river"
+                },
+                {
+                  "from": "minecraft:frozen_peaks",
+                  "to": "epicterrain:epic_frozen_river"
+                }
+              ]
+            },
+            {
+              "variants": [
+                {
+                  "from": "minecraft:stony_shore",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:swamp",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:mangrove_swamp",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:snowy_slopes",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:snowy_plains",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:snowy_beach",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:windswept_gravelly_hills",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:grove",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:windswept_hills",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:snowy_taiga",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:windswept_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:taiga",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:plains",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:meadow",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:beach",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:old_growth_spruce_taiga",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:flower_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:birch_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:dark_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:pale_garden",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:savanna_plateau",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:savanna",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:jungle",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:badlands",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:desert",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:wooded_badlands",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:jagged_peaks",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:stony_peaks",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:frozen_river",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:river",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:ice_spikes",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                },
+                {
+                  "from": "minecraft:dappled_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:old_growth_pine_taiga",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:sunflower_plains",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:old_growth_birch_forest",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:sparse_jungle",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:bamboo_jungle",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:eroded_badlands",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:windswept_savanna",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:cherry_grove",
+                  "to": "epicterrain:epic_grand_river"
+                },
+                {
+                  "from": "minecraft:frozen_peaks",
+                  "to": "epicterrain:epic_frozen_grand_river"
+                }
+              ]
+            }
+          ]
+        },
+        "settings": "epicterrain:overworld"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:multi_noise",
+          "preset": "minecraft:nether"
+        },
+        "settings": "minecraft:nether"
+      }
+    }
+  }
+}

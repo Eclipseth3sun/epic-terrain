@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:mul",
+  "left": {
+    "type": "minecraft:mul",
+    "left": "epicterrain:range/influence_t",
+    "right": "epicterrain:range/influence_t"
+  },
+  "right": {
+    "type": "minecraft:sub",
+    "left": 3.0,
+    "right": {
+      "type": "minecraft:mul",
+      "left": "epicterrain:range/influence_t",
+      "right": 2.0
+    }
+  }
+}

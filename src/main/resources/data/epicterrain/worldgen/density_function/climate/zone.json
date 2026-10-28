@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "epicterrain:river/zone",
+  "min_inclusive": 0.5,
+  "max_exclusive": 100.0,
+  "when_in_range": "epicterrain:river/zone",
+  "when_out_of_range": "epicterrain:climate/range_zone"
+}

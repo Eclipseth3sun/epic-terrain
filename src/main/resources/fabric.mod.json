@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "epicterrain",
+	"version": "${version}",
+	"name": "Epic Terrain",
+	"description": "Two world types: Epic Terrain, with mountain ranges and foothills blended into vanilla terrain, and Earth (prototype), a continent shaped by simulated tectonics, erosion and climate, with rivers, lakes, islands and vanilla's caves.",
+	"authors": [
+		"Eclipseth3sun"
+	],
+	"contact": {
+		"homepage": "https://github.com/Eclipseth3sun/epic-terrain",
+		"sources": "https://github.com/Eclipseth3sun/epic-terrain",
+		"issues": "https://github.com/Eclipseth3sun/epic-terrain/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/epicterrain/icon.png",
+	"environment": "*",
+	"accessWidener": "epicterrain.accesswidener",
+	"entrypoints": {
+		"main": [
+			"com.epicterrain.EpicTerrain"
+		]
+	},
+	"mixins": [
+		"epicterrain.mixins.json",
+		{
+			"config": "epicterrain.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

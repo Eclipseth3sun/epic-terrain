@@ -1,0 +1,17 @@
+{
+  "values": [
+    "epicterrain:foothills_cold",
+    "epicterrain:foothills_temperate",
+    "epicterrain:atoll",
+    "epicterrain:foothills_dry",
+    "epicterrain:epic_wall_peaks",
+    "epicterrain:volcano",
+    "epicterrain:epic_frozen_river",
+    "epicterrain:epic_frozen_grand_river",
+    "epicterrain:epic_river",
+    "epicterrain:epic_grand_river",
+    "epicterrain:crater_lake",
+    "epicterrain:foothills_wet",
+    "epicterrain:epic_range_peaks"
+  ]
+}

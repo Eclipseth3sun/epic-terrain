@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:lerp",
+    "alpha": "epicterrain:climate/zone_peak",
+    "first": {
+      "type": "minecraft:lerp",
+      "alpha": "epicterrain:climate/zone_slope",
+      "first": {
+        "type": "minecraft:lerp",
+        "alpha": "epicterrain:climate/zone_foot",
+        "first": "minecraft:overworld/erosion",
+        "second": -0.25
+      },
+      "second": -0.6
+    },
+    "second": -0.9
+  }
+}

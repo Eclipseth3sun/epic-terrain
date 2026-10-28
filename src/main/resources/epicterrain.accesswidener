@@ -1,0 +1,8 @@
+accessWidener v2 official
+
+# EpicChunkGenerator reuses vanilla's noise terrain pipeline but needs its own serialized form (the slider percentage).
+extendable class net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator
+
+# EarthChunkGenerator answers 'where is there water?' per column (rivers, lakes) by replacing the picker the noise pipeline fills fluid from.
+accessible field net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator globalFluidPicker Ljava/util/function/Supplier;
+mutable field net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator globalFluidPicker Ljava/util/function/Supplier;

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "epicterrain:range/uplift",
+  "min_inclusive": 3.0,
+  "max_exclusive": 100.0,
+  "when_in_range": 3.0,
+  "when_out_of_range": 0.0
+}

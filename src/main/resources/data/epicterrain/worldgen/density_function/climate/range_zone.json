@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "epicterrain:range/uplift",
+  "min_inclusive": 100.0,
+  "max_exclusive": 100000.0,
+  "when_in_range": "epicterrain:climate/summit_code",
+  "when_out_of_range": "epicterrain:climate/foothill_code"
+}

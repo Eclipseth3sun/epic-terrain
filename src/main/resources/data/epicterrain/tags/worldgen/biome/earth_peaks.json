@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:jagged_peaks",
+    "epicterrain:epic_wall_peaks",
+    "minecraft:frozen_peaks",
+    "epicterrain:epic_range_peaks",
+    "minecraft:stony_peaks",
+    "epicterrain:volcano"
+  ]
+}

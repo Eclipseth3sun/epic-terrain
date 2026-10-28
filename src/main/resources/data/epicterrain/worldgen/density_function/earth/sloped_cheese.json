@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:mul",
+  "left": "epicterrain:earth/density",
+  "right": 0.125
+}

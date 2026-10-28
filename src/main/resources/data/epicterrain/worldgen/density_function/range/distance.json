@@ -1,0 +1,66 @@
+{
+  "type": "epicterrain:range_field",
+  "output": "distance",
+  "occupancy": "epicterrain:config/range_occupancy",
+  "land": "minecraft:overworld/continents",
+  "warp_x": "epicterrain:range/warp_x",
+  "warp_z": "epicterrain:range/warp_z",
+  "peak_noise": "epicterrain:range/peak_noise",
+  "detail_noise": "epicterrain:range/detail_noise",
+  "hill_noise": "epicterrain:range/hill_noise",
+  "layout": {
+    "cell_size": 6144,
+    "slots": 4,
+    "line_share": 0.35,
+    "arc_share": 0.45,
+    "wall_share": 0.45,
+    "line_length": [
+      3500.0,
+      7500.0
+    ],
+    "arc_radius": [
+      1600.0,
+      2800.0
+    ],
+    "arc_sweep": [
+      70.0,
+      200.0
+    ],
+    "bowl_sweep": [
+      230.0,
+      330.0
+    ],
+    "taper": 0.14
+  },
+  "profile": {
+    "peak_base": 205.0,
+    "peak_variation": 60.0,
+    "detail_floor": 0.6,
+    "foothill_core": [
+      50.0,
+      560.0
+    ],
+    "foothill_skirt": [
+      0.0,
+      950.0
+    ],
+    "foothill_skirt_height": 80.0,
+    "wall_core": [
+      125.0,
+      400.0
+    ],
+    "wall_skirt": [
+      0.0,
+      440.0
+    ],
+    "wall_skirt_height": 22.0,
+    "foothill_land": [
+      -0.55,
+      -0.25
+    ],
+    "wall_land": [
+      -0.55,
+      -0.25
+    ]
+  }
+}

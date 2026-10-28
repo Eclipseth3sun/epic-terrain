@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:lerp",
+  "alpha": "epicterrain:range/influence",
+  "first": {
+    "type": "minecraft:gradient",
+    "axis": "y",
+    "from_coordinate": 240,
+    "from_value": 1.0,
+    "to_coordinate": 256,
+    "to_value": 0.0
+  },
+  "second": {
+    "type": "minecraft:gradient",
+    "axis": "y",
+    "from_coordinate": 496,
+    "from_value": 1.0,
+    "to_coordinate": 512,
+    "to_value": 0.0
+  }
+}

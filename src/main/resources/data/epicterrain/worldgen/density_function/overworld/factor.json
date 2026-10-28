@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:lerp",
+    "alpha": "epicterrain:range/influence",
+    "first": "minecraft:overworld/factor",
+    "second": {
+      "type": "minecraft:lerp",
+      "alpha": "epicterrain:range/kind",
+      "first": 4.7,
+      "second": 3.6
+    }
+  }
+}

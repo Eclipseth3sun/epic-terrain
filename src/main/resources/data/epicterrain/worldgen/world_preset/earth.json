@@ -1,0 +1,41 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "epicterrain:overworld",
+      "generator": {
+        "type": "epicterrain:earth_noise",
+        "settings": "epicterrain:earth",
+        "biome_source": {
+          "type": "epicterrain:earth",
+          "base": {
+            "preset": "minecraft:overworld"
+          },
+          "volcano": "epicterrain:volcano",
+          "atoll": "epicterrain:atoll",
+          "crater_lake": "epicterrain:crater_lake"
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:multi_noise",
+          "preset": "minecraft:nether"
+        },
+        "settings": "minecraft:nether"
+      }
+    }
+  }
+}
