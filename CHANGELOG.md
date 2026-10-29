@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.1
+## 1.1.0
 
 * **Removed: the "Epic Terrain" world type.** The mod now has one world type, **Earth (prototype)**, which is closer to what the mod is for. With it went the Customize slider, the epic range and river
   biomes (`epicterrain:epic_*`, `foothills_*`) and their `/locate` tags, the epic rivers, and the code behind them. **A world made with 1.0.0's Epic Terrain type will not open with this version**

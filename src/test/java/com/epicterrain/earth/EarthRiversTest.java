@@ -113,7 +113,7 @@ class EarthRiversTest {
 				assertTrue(r.width[k] >= r.width[k - 1] - 1.0e-6, "river " + r.index + " does not narrow downstream at node " + k);
 				double gap = Math.hypot(r.line.get(k)[0] - r.line.get(k - 1)[0], r.line.get(k)[1] - r.line.get(k - 1)[1]);
 				// nodes are evenly spaced along the line (16 blocks of arc), but the distance between two of them is a chord: round a bend of more than about 100 degrees
-				// in a narrow stream it can drop under a block (seed 4242 with the 1.0.1 rock layers: one such node in 652 rivers, a 115 degree bend in a river 5 blocks wide)
+				// in a narrow stream it can drop under a block (seed 4242 with the 1.1.0 rock layers: one such node in 652 rivers, a 115 degree bend in a river 5 blocks wide)
 				assertTrue(gap > 0.5 && gap < 1.6 * Rivers.SPACING, "river " + r.index + " node " + k + " is " + gap + " blocks from the last");
 			}
 		}

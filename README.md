@@ -6,14 +6,14 @@ An Earth world is a procedural continent shaped by simulated plate tectonics, ro
 (volcano chains, atolls, mushroom islands) and vanilla's caves, aquifers, ores and structures underneath. The biomes are vanilla's own, steered by the height and climate of the simulated ground. The
 world is a 37.5 km square around the spawn, with deep ocean and islands beyond it.
 
-**Version 1.0.1.** 107 automated tests pass: they load the real world preset through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real
+**Version 1.1.0.** 107 automated tests pass: they load the real world preset through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real
 launcher in survival, with Distant Horizons, Sodium and Iris with a shader pack, and crossed the continent on horseback; the caves, aquifers and cave biomes have had little play, and Voxy and dedicated
 servers have not been tried. This version removed the mod's first world type ("Epic Terrain"): worlds made with it no longer open (see the [changelog](CHANGELOG.md)).
 
 ## Install
 
 You need Minecraft Java Edition **26.3**, [Fabric Loader](https://fabricmc.net/use/installer/) **0.20.1** or newer, and [Fabric API](https://modrinth.com/mod/fabric-api) **0.165.0+26.3**. Put the Fabric API jar
-and `epicterrain-1.0.1.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Earth (prototype)**.
+and `epicterrain-1.1.0.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Earth (prototype)**.
 An Earth world simulates its continent when it loads and takes about a minute to start.
 
 For a far view and shaders, these were checked against Modrinth's lists for 26.3:
@@ -30,7 +30,7 @@ For a far view and shaders, these were checked against Modrinth's lists for 26.3
 ## Build from source
 
 ```bash
-./gradlew assemble     # writes build/libs/epicterrain-1.0.1.jar (no tests)
+./gradlew assemble     # writes build/libs/epicterrain-1.1.0.jar (no tests)
 ./gradlew test         # the whole suite, about 2 minutes
 ./gradlew runClient    # a development client with the mod
 ```

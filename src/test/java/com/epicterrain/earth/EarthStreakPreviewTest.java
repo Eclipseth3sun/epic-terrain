@@ -24,7 +24,7 @@ class EarthStreakPreviewTest {
 		{ "C_bendier", "0.35", "2.0", "16000" },
 		{ "D_both", "0.22", "2.0", "16000" },
 		{ "E_curvy", "0.22", "3.0", "10000" },
-		{ "F_middle", "0.25", "2.5", "12000" }, // the default since 1.0.1
+		{ "F_middle", "0.25", "2.5", "12000" }, // the default since 1.1.0
 		{ "G_waves", "0.25", "2.0", "9000" },
 	};
 
