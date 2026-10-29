@@ -246,10 +246,11 @@ final class Landscape {
 	 */
 	private void addStrata(double sigma) {
 		long s = this.config.seed();
-		// the dip of the beds, metres a block (0.35), how far the warp bends the outcrops (1 is 6 km of warp) and the size of its waves in blocks (16,000)
-		double tiltRate = dial("tilt", 0.35);
-		double bend = dial("bend", 1.0);
-		double bendScale = dial("bendScale", 16_000.0);
+		// the dip of the beds, metres a block (0.25), how far the warp bends the outcrops (2.5 times 6 km of warp) and the size of its waves in blocks (12,000);
+		// version 1.0.0 had 0.35, 1 and 16,000, which combed the plains into long parallel diagonal bands (see docs/DEVELOPMENT.md, "Rock-layer streaks")
+		double tiltRate = dial("tilt", 0.25);
+		double bend = dial("bend", 2.5);
+		double bendScale = dial("bendScale", 12_000.0);
 		double phi = 2.0 * Math.PI * Noise.unit(s, 501, 0, 1);
 		double psi = phi + 0.5 * Math.PI + 0.8 * (Noise.unit(s, 502, 0, 2) - 0.5);
 		float[] belt = new float[this.nx * this.nz];
@@ -263,7 +264,7 @@ final class Landscape {
 				double wx = this.worldX(x);
 				double wz = this.worldZ(z);
 				double folds = Noise.smooth(0.03, 0.18, near[i]);
-				// the tilt is warped over regions about 16 km across, so the dip changes from place to place (flat-lying where the warp cancels it,
+				// the tilt is warped over regions about 12 km across, so the dip changes from place to place (flat-lying where the warp cancels it,
 				// steep where it adds, even turning over into a dome or a basin) and the outcrops of a bed sweep in curves, not parallel lines
 				double tilt = tiltRate * (wx * Math.cos(phi) + wz * Math.sin(phi) + 6000.0 * bend * Noise.fbm(s + 509, wx / bendScale, wz / bendScale, 2));
 				double across = wx * Math.cos(psi) + wz * Math.sin(psi) + 1100.0 * Noise.fbm(s + 505, wx / 7000.0, wz / 7000.0, 2);

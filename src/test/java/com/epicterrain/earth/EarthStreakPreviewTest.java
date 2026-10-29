@@ -19,12 +19,12 @@ import org.junit.jupiter.api.Test;
 class EarthStreakPreviewTest {
 	private static final String[][] VARIANTS = {
 		// name, tilt, bend, bendScale
-		{ "A_now", "0.35", "1.0", "16000" },
+		{ "A_v100", "0.35", "1.0", "16000" }, // version 1.0.0
 		{ "B_gentler", "0.20", "1.0", "16000" },
 		{ "C_bendier", "0.35", "2.0", "16000" },
 		{ "D_both", "0.22", "2.0", "16000" },
 		{ "E_curvy", "0.22", "3.0", "10000" },
-		{ "F_middle", "0.25", "2.5", "12000" },
+		{ "F_middle", "0.25", "2.5", "12000" }, // the default since 1.0.1
 		{ "G_waves", "0.25", "2.0", "9000" },
 	};
 

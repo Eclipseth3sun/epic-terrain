@@ -374,6 +374,8 @@ class EarthGameTest {
 			ProtoChunk chunk = build(c[0], c[1]);
 			Map<String, Integer> tops = new TreeMap<>();
 			int wrongGround = 0;
+			int higher = 0;
+			int shaved = 0;
 			int wrongWater = 0;
 			int columns = 0;
 			for (int dx = 0; dx < 16; dx++) {
@@ -393,8 +395,14 @@ class EarthGameTest {
 					tops.merge(chunk.getBlockState(new BlockPos(x, solid, z)).getBlock().toString().replace("Block{minecraft:", "").replace("}", ""), 1, Integer::sum);
 					columns++;
 					int expectedSolid = (int) Math.ceil(63 + out[0]) - 1;
-					if (Math.abs(solid - expectedSolid) > 0) {
+					// the ground is the model's, and vanilla's caves can only take away: never higher than the model; a cave just under the surface thins its roof
+					// by a block or three (the density is interpolated over 4 x 8 blocks); a cave opening or an entrance takes the surface down by more
+					if (solid > expectedSolid) {
+						higher++;
+					} else if (solid < expectedSolid - 3) {
 						wrongGround++;
+					} else if (solid < expectedSolid) {
+						shaved++;
 					}
 					int level = Double.isNaN(out[1]) ? 63 : 63 + (int) Math.round(out[1]);
 					if (out[0] < 0 || !Double.isNaN(out[1])) {
@@ -405,8 +413,9 @@ class EarthGameTest {
 					}
 				}
 			}
-			System.out.printf("chunk %d (%d,%d): %d columns, %d with the wrong ground, %d with the wrong water; surface blocks %s%n", index, c[0], c[1], columns, wrongGround, wrongWater, tops);
-			assertTrue(wrongGround * 4 <= columns, "chunk " + index + ": " + wrongGround + " columns whose highest solid block is not the modelled ground (a cave opening the surface is the only reason)");
+			System.out.printf("chunk %d (%d,%d): %d columns, %d higher than the model, %d opened more than 3 blocks down, %d thinned by 1 to 3 blocks, %d with the wrong water; surface blocks %s%n", index, c[0], c[1], columns, higher, wrongGround, shaved, wrongWater, tops);
+			assertEquals(0, higher, "chunk " + index + ": columns whose highest solid block is above the modelled ground");
+			assertTrue(wrongGround * 4 <= columns, "chunk " + index + ": " + wrongGround + " columns whose highest solid block is more than 3 blocks under the modelled ground (a cave opening the surface is the only reason)");
 			assertTrue(wrongWater * 4 <= columns, "chunk " + index + ": " + wrongWater + " columns whose water is not at the modelled level");
 		}
 	}

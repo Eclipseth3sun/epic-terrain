@@ -1,7 +1,12 @@
 package com.epicterrain.earth;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +46,30 @@ class EarthRockTest {
 		}
 		double mean = sum / n;
 		return Math.sqrt(squares / n - mean * mean);
+	}
+
+	/** Runs something with the tilt, bend and bend-scale dials set, and puts them back. */
+	private static <T> T withDials(String tilt, String bend, String scale, Supplier<T> run) {
+		System.setProperty("epicterrain.earth.tilt", tilt);
+		System.setProperty("epicterrain.earth.bend", bend);
+		System.setProperty("epicterrain.earth.bendScale", scale);
+		try {
+			return run.get();
+		} finally {
+			System.clearProperty("epicterrain.earth.tilt");
+			System.clearProperty("epicterrain.earth.bend");
+			System.clearProperty("epicterrain.earth.bendScale");
+		}
+	}
+
+	@Test
+	void theBedsBendByDefaultAndTheDialsCanReturnThemToVersion100() {
+		EarthConfig config = small(7L);
+		Continent byDefault = ContinentSimulator.run(config);
+		Continent explicit = withDials("0.25", "2.5", "12000", () -> ContinentSimulator.run(config));
+		assertArrayEquals(byDefault.height, explicit.height, "the defaults are the bent setting (tilt 0.25, bend 2.5, waves of 12 km)");
+		Continent first = withDials("0.35", "1.0", "16000", () -> ContinentSimulator.run(config));
+		assertFalse(Arrays.equals(byDefault.height, first.height), "version 1.0.0's straighter beds build a different land");
 	}
 
 	@Test

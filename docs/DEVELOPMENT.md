@@ -424,6 +424,29 @@ uniform rock exactly, 1 the default, 2 twice the contrast.
   within 15% (seed 4244 now has a fossil belt of 369 blocks against 368, hard beds preserve it); the river-valley tests allow falls up to 12 blocks
   between nodes, a big river to step once every 40 blocks, 1% of nodes cut deeper than the usual limit, and 10% of places perched beside a bank.
 
+### Rock-layer streaks and their tuning (1.0.1)
+
+The first survival playtest (2026-10-28/29) of 1.0.0 found that, on a map, the plains were combed in long parallel NE-SW bands (not very noticeable at ground level). They are the outcrops of the tilted
+beds (`Landscape.addStrata`): spacing is the bed thickness (about 70 m) over the dip (0.35 m a block), so about 200 blocks, and the dip direction is the same over the whole window with only a 6 km
+warp over 16 km waves to bend it. The bands are confined to where the rock is strongly layered (regions about 9 km across), and their relief is small: **a ripple 4.5 to 5 blocks high in every
+setting tried**, so tuning them changes how the land looks from above and not how it feels to walk over.
+
+Three dials (`tilt`, `bend`, `bendScale`, read when the landscape is built) and `EarthStreakPreviewTest` (preview-tagged: one seed, several settings, the ground dumped for drawing) were added, and
+the seed of that world (-6214704096356883042) was built with each setting. "Parallel" is the mean coherence of the band-passed relief in 2 km windows over the central plains (1 is a comb):
+
+| Setting | tilt, bend, waves | ripple (blocks) | parallel | look |
+|---|---|---|---|---|
+| A (1.0.0) | 0.35, 1, 16 km | 4.8 | 0.77 | straight diagonal bands |
+| B | 0.20, 1, 16 km | 4.5 | 0.73 | the same, a little wider |
+| C | 0.35, 2, 16 km | 4.8 | 0.78 | the same |
+| D | 0.22, 2, 16 km | 4.5 | 0.74 | the same |
+| E | 0.22, 3, 10 km | 4.8 | 0.59 | arcs and whorls |
+| **F (the default since 1.0.1)** | 0.25, 2.5, 12 km | 4.6 | 0.66 | bands that curve in gentle S-shapes |
+| G | 0.25, 2, 9 km | 5.0 | 0.54 | arcs and whorls |
+
+Only a strong bend changes the pattern; a gentler tilt or a plain doubling of the warp looks almost like 1.0.0. Coasts, mountains and the tallest peaks (432 to 454 blocks above sea, against 447) are the same
+in every setting. F was chosen as the smallest change that visibly breaks the comb. The 1.0.0 setting is `tilt=0.35 bend=1 bendScale=16000`.
+
 ### Islands (`Islands`, stage C)
 
 Approved 2026-10-28: "build the island system as you described, with some being special, like atolls, volcanos, etc.", with a driving factor for
@@ -604,7 +627,9 @@ vanilla's own pieces and not inventing a cave system:
   4% / 3% / 1% of land columns. **Dripstone is the bulk** (vanilla's table picks it for most inland climates at those depths, and the Earth's inland continentalness is high); lush needs a humid
   climate and is rare; the deep dark needs erosion of -0.2 or less (mountains) and appears only below them. A dial for the mix is easy to add if it is wrong in play.
 * **Cave openings.** About 8% of dry columns (33 of 397 cell corners) have their top solid block lower than the model's ground because an entrance or a noodle cave opens the surface. That is
-  vanilla's behaviour on any ground; it is not tuned.
+  vanilla's behaviour on any ground; it is not tuned. Seen with the 1.0.1 test chunks (`EarthGameTest.realChunksAreBuiltWithTheModelsGroundWaterAndSurface`): no column is ever higher than the
+  model's ground, 0 to 11 of 256 columns are opened by more than 3 blocks, and 55 / 102 / 28 of 256 (21%, 40%, 11%) are thinned by 1 to 3 blocks where a cave lies just under the ground, because the
+  density is interpolated over 4 x 8 blocks and a cave's top bleeds into the cell above it. So over caves the surface can sit a few blocks lower than the model draws it.
 * **Cost.** A chunk (biomes, fill, surface, no features) took 28.8 ms on one thread in the test, against 20.5 ms before the caves. A futile biome search of 6.4 km took 3.5 s on the test window.
 * **A bug the single-class runs hid** (found by the whole suite, fixed): `EarthChunkGenerator` first read the noise settings in its constructor. Registries load in parallel and the world preset
   (which holds the generator) can be decoded before the noise settings it names are bound, so on some runs the preset failed to parse and every test that loads the registries failed (39 of 150
@@ -632,7 +657,7 @@ and an ocean-monument `/locate structure` still running after four minutes, when
 
 ### Trying it in the real launcher, with shaders and Distant Horizons
 
-`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.0.0.jar` (about 330 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
+`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.0.1.jar` (about 330 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
 client classes and the two mixins (`epicterrain.mixins.json` for both sides, `epicterrain.client.mixins.json` for the client), the generated datapack (`data/`), the language file, the
 icon and the access widener (namespace `official`, as the unobfuscated 26.3 needs). Versions: 0.2.0 was the first one tried in the launcher (the Earth world type without caves, with Distant
 Horizons, which ran well at 32 chunks plus 128 of Distant Horizons); 0.3.0 added vanilla's underground (see "The underground") and the search limits; 1.0.0 is the same code under a release number, with the license and the mod's contact details in its metadata. The release jar was built from the tree of the last full test run (169 tests, 0 failures, 0 errors, 0 skipped). Version 0.2.0 has been loaded by the real launcher; 1.0.0 as such has not yet.
@@ -641,7 +666,7 @@ Horizons, which ran well at 32 chunks plus 128 of Distant Horizons); 0.3.0 added
 
 | File | Where from |
 |---|---|
-| `epicterrain-1.0.0.jar` | `build/libs` here |
+| `epicterrain-1.0.1.jar` | `build/libs` here |
 | `fabric-api-0.165.0+26.3.jar` (what the mod is built against; newer 26.3 builds should do) | [Fabric API](https://modrinth.com/mod/fabric-api) |
 | `sodium-fabric-0.9.2+mc26.3.jar` | [Sodium](https://modrinth.com/mod/sodium) |
 | `iris-fabric-1.11.7+mc26.3.jar` | [Iris](https://modrinth.com/mod/iris) |

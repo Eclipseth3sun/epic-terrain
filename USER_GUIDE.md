@@ -1,6 +1,6 @@
 # Epic Terrain: user guide
 
-Epic Terrain 1.0.0 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds two world types next to vanilla's (Default, Superflat, Amplified and the rest are unchanged):
+Epic Terrain 1.0.1 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds two world types next to vanilla's (Default, Superflat, Amplified and the rest are unchanged):
 
 | World type | What it is |
 |---|---|
@@ -22,7 +22,7 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 |---|---|---|
 | Fabric Loader | 0.20.1 or newer | [Fabric installer](https://fabricmc.net/use/installer/) |
 | Fabric API | 0.165.0+26.3 (the version this mod is built against; newer 26.3 builds should work but were not tried) | [Modrinth: Fabric API](https://modrinth.com/mod/fabric-api) |
-| Epic Terrain | 1.0.0 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.0.0.jar`) |
+| Epic Terrain | 1.0.1 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.0.1.jar`) |
 
 **Optional, for better graphics and a far view.** These versions were checked against Modrinth's lists for 26.3 on 2026-10-28.
 
@@ -41,7 +41,7 @@ distance of 32 chunks plus 128 chunks of Distant Horizons. The exact Distant Hor
 
 1. **Install Fabric** for Minecraft 26.3 with the [Fabric installer](https://fabricmc.net/use/installer/): pick 26.3 and loader 0.20.1 or newer, and let it create a launcher profile.
 2. **Open your mods folder.** Windows: `%APPDATA%\.minecraft\mods` (create it if it is not there). macOS: `~/Library/Application Support/minecraft/mods`. Linux: `~/.minecraft/mods`.
-3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.0.0.jar`, plus any optional mods from the table above. Remove older Epic Terrain jars so there is only one.
+3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.0.1.jar`, plus any optional mods from the table above. Remove older Epic Terrain jars so there is only one.
 4. **Give the game memory** (recommended with Distant Horizons, and harmless without it). In the launcher, open the Fabric profile, then **More options** (or **Edit**) and in **JVM arguments** change
    `-Xmx2G` to `-Xmx6G` or more if your computer has the memory. The Earth world itself needs little (a full test of its simulation fits in 2 GB), but Distant Horizons keeps a lot.
 5. **Start the game** with the Fabric profile. The log (`.minecraft/logs/latest.log`) should contain the line `Epic Terrain loaded`.
@@ -88,7 +88,7 @@ stored in the world.
 A higher setting replaces more of vanilla with epic terrain and puts ranges closer together; at the top end neighbours can overlap and merge into larger massifs. Even at 100% there is vanilla land between
 most ranges. Pressing Customize a second time starts from the current value; picking another world type and coming back resets it.
 
-**Dedicated servers** (`level-type=epicterrain:epic` in `server.properties`; not tried in 1.0.0) get the default. To change it, a datapack can replace
+**Dedicated servers** (`level-type=epicterrain:epic` in `server.properties`; not tried) get the default. To change it, a datapack can replace
 `data/epicterrain/worldgen/density_function/config/range_occupancy.json` with a number from `0.01` to `1.0` (slider divided by 100). `config/height_scale.json` (default `1.05`) multiplies how tall ranges rise.
 
 ### Biomes and finding things
@@ -198,6 +198,8 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | `temperature` | 12 | Mean yearly temperature at sea level at the middle of the window, in °C. |
 | `steps` | 140 | Time steps of the simulation (fewer is faster and rougher). |
 | `rock` | 1 | How much rock layers matter: 0 is uniform rock, 2 is twice the contrast. |
+| `tilt` | 0.25 | How steeply the rock beds dip, in metres per block. Where the beds meet the surface they make the faint bands on the plains; a smaller tilt widens them. |
+| `bend`, `bendScale` | 2.5, 12000 | How far the outcrops of the beds curve (a multiplier on a 6 km warp) and the size of the waves of that warp, in blocks. Version 1.0.0 used `tilt=0.35`, `bend=1`, `bendScale=16000`, which gives straighter, more parallel bands. |
 | `crag` | 1 | Strength of the fine relief: 0 is smooth, 2 twice as craggy. |
 | `riverWidth` | 3 | Width of the smallest river, in blocks. |
 | `riverDepth`, `floodplain` | 1, 1 | Multiply the depth of every river and the width of every floodplain. |
@@ -215,7 +217,7 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | `/locate` says it could not find something that should be there. | The 5-second limit, or it is beyond 6,400 blocks. Raise `locateSeconds`, or travel. |
 | Distant Horizons fills in slowly. | It is generating real chunks through the Earth model; give it time, or lower its quality settings. |
 | A shader pack shows no distant terrain. | The pack probably does not support Distant Horizons. Try another pack, or turn Distant Horizons off. |
-| New chunks do not match old ones. | The options or the mod version differ from when the world was made (see [seeds](#seeds-saving-and-updating)). |
+| New chunks do not match old ones. | The options or the mod version differ from when the world was made (see [seeds](#seeds-saving-and-updating)). Version 1.0.1 curved the rock-layer bands, so an Earth world made with 1.0.0 shows a seam in the plains where new chunks begin; the options above set the 1.0.0 pattern back. |
 | An Earth world made with version 0.2.0 has no caves in the parts you explored before. | 0.2.0 had no caves; 1.0.0 puts caves in newly generated chunks only. |
 
 ## Known limitations
@@ -225,8 +227,8 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 * The continent is a single 37.5 km window; there is no more land beyond it, only ocean and islands.
 * The simulation is not saved: every launch of a world simulates again (about a minute).
 * Riverbeds are plain dirt or gravel from the surface rules; there are no waterfalls, deltas or oxbow lakes yet.
-* Caves open the surface on about 8% of dry columns (vanilla's cave entrances); dripstone caves are most of the cave biomes at 30 to 80 blocks down, and lush caves are rare.
-* Structures on this terrain, the cave decoration and dedicated servers have not been tried; the classic carvers and the underground had little play in 1.0.0.
+* Caves open the surface on about 8% of dry columns (vanilla's cave entrances), and where a cave lies just under the ground the surface can sit 1 to 3 blocks lower than the terrain model draws it (a fifth to two fifths of the columns in the land chunks tested); dripstone caves are most of the cave biomes at 30 to 80 blocks down, and lush caves are rare.
+* Structures on this terrain, the cave decoration and dedicated servers have not been tried; the classic carvers and the underground have had little play.
 * No glaciers or snowfields beyond what vanilla's biomes give; badlands appear only where the climate reaches them.
 
 **Epic Terrain**
@@ -236,6 +238,6 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 
 ## Reporting problems
 
-Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.0.0), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
+Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.0.1), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
 what world type and seed, what you did, and the end of `.minecraft/logs/latest.log` (and the file in `.minecraft/crash-reports` if the game crashed). For terrain you think looks wrong, a screenshot with F3
 open and the coordinates is the most useful thing. How the mod works inside, and what has been measured, is in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

@@ -8,13 +8,13 @@ A Fabric mod for Minecraft Java 26.3 with two world types, both added *alongside
   islands in the open ocean (volcano chains, atolls, mushroom islands) and vanilla's caves, aquifers, ores and structures underneath. The biomes are vanilla's own, steered by the height and climate of
   the simulated ground. The world is a 37.5 km square around the spawn, with deep ocean and islands beyond it.
 
-**Version 1.0.0.** 169 automated tests pass: they load the real world presets through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real launcher
-with Distant Horizons (version 0.2.0, before the caves came back); the caves, aquifers and cave biomes of 1.0.0 have had little play, and shaders, Voxy and dedicated servers have not been tried.
+**Version 1.0.1.** 170 automated tests pass: they load the real world presets through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real launcher
+with Distant Horizons (version 0.2.0, before the caves came back); the caves, aquifers and cave biomes have had little play, and shaders, Voxy and dedicated servers have not been tried.
 
 ## Install
 
 You need Minecraft Java Edition **26.3**, [Fabric Loader](https://fabricmc.net/use/installer/) **0.20.1** or newer, and [Fabric API](https://modrinth.com/mod/fabric-api) **0.165.0+26.3**. Put the Fabric API jar
-and `epicterrain-1.0.0.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Epic Terrain**
+and `epicterrain-1.0.1.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Epic Terrain**
 or **Earth (prototype)**. An Earth world simulates its continent when it loads and takes about a minute to start.
 
 For a far view and shaders, these were checked against Modrinth's lists for 26.3:
@@ -31,7 +31,7 @@ For a far view and shaders, these were checked against Modrinth's lists for 26.3
 ## Build from source
 
 ```bash
-./gradlew assemble     # writes build/libs/epicterrain-1.0.0.jar (no tests)
+./gradlew assemble     # writes build/libs/epicterrain-1.0.1.jar (no tests)
 ./gradlew test         # the whole suite, about 11 minutes
 ./gradlew runClient    # a development client with the mod
 ```

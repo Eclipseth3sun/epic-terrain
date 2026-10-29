@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1
+
+* **Earth world: the bands of the rock layers on the plains curve instead of running as long parallel diagonal streaks.** Seen from above, the 1.0.0 plains were combed in straight bands about
+  200 blocks apart across the whole continent. The beds now dip a little less (0.25 m a block, from 0.35) and their outcrops bend more (the warp is 2.5 times larger and its waves 12 km across, from
+  16 km), so the bands flow in gentle S-curves. How bumpy the ground is does not change (the ripple is 4.6 blocks high, against 4.8), and the coasts, mountain ranges and tallest peaks are the same; lakes
+  and rivers shift slightly because erosion comes out a little differently.
+* New options `-Depicterrain.earth.tilt`, `.bend` and `.bendScale` for those three numbers (`tilt=0.35 bend=1 bendScale=16000` is the 1.0.0 pattern).
+* **Earth worlds made with 1.0.0 will show a seam** where newly generated chunks meet old ones, because the terrain pattern changed. A new world is not affected.
+
 ## 1.0.0
 
 The first release. Two world types for Minecraft Java 26.3 (Fabric Loader 0.20.1+, Fabric API 0.165.0+26.3).
