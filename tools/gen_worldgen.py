@@ -233,7 +233,7 @@ def build(g):
     }
     g.write(f"data/{NS}/worldgen/world_preset/earth.json", earth_preset)
     g.write("data/minecraft/tags/worldgen/world_preset/normal.json", {"values": [f"{NS}:earth"]})
-    lang[f"generator.{NS}.earth"] = "Earth (prototype)"
+    lang[f"generator.{NS}.earth"] = "Earth"
     g.write(f"assets/{NS}/lang/en_us.json", lang)
 
 

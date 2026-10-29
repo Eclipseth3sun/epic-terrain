@@ -25,7 +25,7 @@ public class EpicTerrain implements ModInitializer {
 	public void onInitialize() {
 		registerWorldgen(Registry::register);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> EarthWorlds.clear());
-		LOGGER.info("Epic Terrain loaded");
+		LOGGER.info("Tectonic Terrain loaded");
 	}
 
 	/** How a worldgen type gets into a built-in registry; tests swap this out because they bootstrap after the freeze. */

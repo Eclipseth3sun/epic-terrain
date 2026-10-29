@@ -399,7 +399,7 @@ in the days of the Epic biomes, failed on the first version).
 ### The Earth world type in the game
 
 Built 2026-10-28 on the user's go-ahead ("Approve, build it"). It was built as a second world type next to Epic Terrain (removed in 1.1.0): **Create New World, World Type,
-"Earth (prototype)"** (the preset `epicterrain:earth`; a dedicated server would use `level-type=epicterrain:earth`, which has not been tried). This section was written before the first play;
+"Earth"** (the button said "Earth (prototype)" until the rename; the preset `epicterrain:earth`; a dedicated server would use `level-type=epicterrain:earth`, which has not been tried). This section was written before the first play;
 it was then played in the development client and, as version 0.2.0 (without caves), in the real launcher with Distant Horizons, where the author reported it "ran good on 32 chunks, + 128 from
 distant horizons". What it says "tested" was tested headlessly through the game's own loaders and generator (`EarthGameTest`, 20 tests).
 

@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "epicterrain",
 	"version": "${version}",
-	"name": "Epic Terrain",
-	"description": "Earth (prototype): a world type whose continent is shaped by simulated plate tectonics, erosion and climate, with rivers, lakes, islands in the open ocean, and vanilla's caves and structures.",
+	"name": "Tectonic Terrain",
+	"description": "Earth: a world type whose continent is shaped by simulated plate tectonics, erosion and climate, with rivers, lakes, islands in the open ocean, and vanilla's caves and structures.",
 	"authors": [
 		"Eclipseth3sun"
 	],

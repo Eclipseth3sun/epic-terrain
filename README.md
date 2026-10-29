@@ -1,6 +1,6 @@
-# Epic Terrain
+# Tectonic Terrain
 
-A Fabric mod for Minecraft Java 26.3 that adds one world type, **Earth (prototype)**, *alongside* vanilla (the Default, Amplified and other presets are unchanged).
+A Fabric mod for Minecraft Java 26.3 that adds one world type, **Earth**, *alongside* vanilla (the Default, Amplified and other presets are unchanged).
 
 An Earth world is a procedural continent shaped by simulated plate tectonics, rock layers, erosion and climate, with rivers that run from the mountains to the sea, lakes, islands in the open ocean
 (volcano chains, atolls, mushroom islands) and vanilla's caves, aquifers, ores and structures underneath. The biomes are vanilla's own, steered by the height and climate of the simulated ground. The
@@ -8,12 +8,13 @@ world is a 37.5 km square around the spawn, with deep ocean and islands beyond i
 
 **Version 1.1.0.** 107 automated tests pass: they load the real world preset through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real
 launcher in survival, with Distant Horizons, Sodium and Iris with a shader pack, and crossed the continent on horseback; the caves, aquifers and cave biomes have had little play, and Voxy and dedicated
-servers have not been tried. This version removed the mod's first world type ("Epic Terrain"): worlds made with it no longer open (see the [changelog](CHANGELOG.md)).
+servers have not been tried. The mod was called Epic Terrain until it was renamed; its id and jar name (`epicterrain`) are unchanged. Version 1.1.0 removed its first world type, "Epic Terrain":
+worlds made with that no longer open (see the [changelog](CHANGELOG.md)).
 
 ## Install
 
 You need Minecraft Java Edition **26.3**, [Fabric Loader](https://fabricmc.net/use/installer/) **0.20.1** or newer, and [Fabric API](https://modrinth.com/mod/fabric-api) **0.165.0+26.3**. Put the Fabric API jar
-and `epicterrain-1.1.0.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Earth (prototype)**.
+and `epicterrain-1.1.0.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Earth**.
 An Earth world simulates its continent when it loads and takes about a minute to start.
 
 For a far view and shaders, these were checked against Modrinth's lists for 26.3:
@@ -43,5 +44,5 @@ For a far view and shaders, these were checked against Modrinth's lists for 26.3
 
 ## License
 
-[MIT](LICENSE) for this project's code and tools. Epic Terrain is not made by or affiliated with Mojang or Microsoft; Minecraft is their trademark. The generated datapack contains data derived from
+[MIT](LICENSE) for this project's code and tools. Tectonic Terrain is not made by or affiliated with Mojang or Microsoft; Minecraft is their trademark. The generated datapack contains data derived from
 Minecraft's own, and Mojang's terms continue to apply to what comes from the game.
