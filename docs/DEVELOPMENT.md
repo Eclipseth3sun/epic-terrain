@@ -507,7 +507,7 @@ and an ocean-monument `/locate structure` still running after four minutes, when
 
 ### Trying it in the real launcher, with shaders and Distant Horizons
 
-`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.1.1.jar` (about 160 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
+`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.2.0.jar` (about 160 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
 mixin (`epicterrain.mixins.json`), the generated datapack (`data/`), the language file, the
 icon and the access widener (namespace `official`, as the unobfuscated 26.3 needs). Versions: 0.2.0 was the first one tried in the launcher (the Earth world type without caves, with Distant
 Horizons, which ran well at 32 chunks plus 128 of Distant Horizons); 0.3.0 added vanilla's underground (see "The underground") and the search limits; 1.0.0 is the same code under a release number, with the license and the mod's contact details in its metadata. The release jar was built from the tree of the last full test run (169 tests, 0 failures, 0 errors, 0 skipped). Version 0.2.0 has been loaded by the real launcher; 1.0.0 as such has not yet.
@@ -516,7 +516,7 @@ Horizons, which ran well at 32 chunks plus 128 of Distant Horizons); 0.3.0 added
 
 | File | Where from |
 |---|---|
-| `epicterrain-1.1.1.jar` | `build/libs` here |
+| `epicterrain-1.2.0.jar` | `build/libs` here |
 | `fabric-api-0.165.0+26.3.jar` (what the mod is built against; newer 26.3 builds should do) | [Fabric API](https://modrinth.com/mod/fabric-api) |
 | `sodium-fabric-0.9.2+mc26.3.jar` | [Sodium](https://modrinth.com/mod/sodium) |
 | `iris-fabric-1.11.7+mc26.3.jar` | [Iris](https://modrinth.com/mod/iris) |

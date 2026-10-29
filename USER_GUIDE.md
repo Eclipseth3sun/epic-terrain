@@ -1,6 +1,6 @@
 # Tectonic Terrain: user guide
 
-Tectonic Terrain 1.1.1 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
+Tectonic Terrain 1.2.0 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
 (The mod was called Epic Terrain until it was renamed. Its id and jar name, `epicterrain`, are unchanged.)
 
 An Earth world is a procedural continent. It is simulated from plate tectonics, rock layers, erosion and climate, so mountain belts, rivers that run from the mountains to the sea, lakes, coasts and
@@ -20,7 +20,7 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 |---|---|---|
 | Fabric Loader | 0.20.1 or newer | [Fabric installer](https://fabricmc.net/use/installer/) |
 | Fabric API | 0.165.0+26.3 (the version this mod is built against; newer 26.3 builds should work but were not tried) | [Modrinth: Fabric API](https://modrinth.com/mod/fabric-api) |
-| Tectonic Terrain | 1.1.1 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.1.1.jar`) |
+| Tectonic Terrain | 1.2.0 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.2.0.jar`) |
 
 **Optional, for better graphics and a far view.** These versions were checked against Modrinth's lists for 26.3 on 2026-10-28.
 
@@ -33,13 +33,13 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 
 **What has been tried.** The author played an Earth world in the real launcher in early-game survival: tamed a horse and rode about 15,000 blocks across the plains to the mountains, with Fabric API
 0.165.0+26.3, Sodium 0.9.2, Iris 1.11.7, Distant Horizons 3.3.4 and the shader pack Complementary Reimagined r5.7.1. Voxy, dedicated servers and other worldgen mods have **not** been tried, and the caves
-have had little play. Nothing above is a guarantee for your machine; if something does not work, see [reporting problems](#reporting-problems).
+have had little play. The marshes and other biomes new in 1.2.0 have been checked headlessly (biome maps, real chunks, generated structure starts) but not played. Nothing above is a guarantee for your machine; if something does not work, see [reporting problems](#reporting-problems).
 
 ## Installing
 
 1. **Install Fabric** for Minecraft 26.3 with the [Fabric installer](https://fabricmc.net/use/installer/): pick 26.3 and loader 0.20.1 or newer, and let it create a launcher profile.
 2. **Open your mods folder.** Windows: `%APPDATA%\.minecraft\mods` (create it if it is not there). macOS: `~/Library/Application Support/minecraft/mods`. Linux: `~/.minecraft/mods`.
-3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.1.1.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
+3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.2.0.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
 4. **Give the game memory** (recommended with Distant Horizons, and harmless without it). In the launcher, open the Fabric profile, then **More options** (or **Edit**) and in **JVM arguments** change
    `-Xmx2G` to `-Xmx6G` or more if your computer has the memory. The Earth world itself needs little (a full test of its simulation fits in 2 GB), but Distant Horizons keeps a lot.
 5. **Start the game** with the Fabric profile. The log (`.minecraft/logs/latest.log`) should contain the line `Tectonic Terrain loaded`.
@@ -69,9 +69,14 @@ The seed works as usual too: the same seed gives the same world.
 * **Islands in the open ocean:** chains of volcanoes (a young volcano with a crater, sometimes holding a crater lake, then older worn ones), atolls (rings of coral islets round a lagoon), arcs of islands, and
   mushroom islands at about vanilla's rate for the ocean area. Small islands also stand in the seas on the continent.
 * **Vanilla's biomes**, chosen from vanilla's own climate table with the height, rainfall and distance from the sea of the simulated ground, plus vanilla's randomness in temperature and humidity (there is no
-  fixed latitude). Mountains turn from forest to meadow to snow as they climb. Each coast gets a beach.
+  fixed latitude). Mountains turn from forest to meadow to snow as they climb. Each coast gets a beach, or in places rock (stony shore). **Every overworld biome occurs**, in about vanilla's shares:
+  the hill country has patches of windswept hills, forests and gravelly hills, some summits are bare warm rock (stony peaks) among the snowy ones, and the sea is deep ocean from 62 blocks down, past the
+  continent's shelf (about 40% of the sea inside the 37.5 km window, and all of the open ocean).
 * **Vanilla's underground:** caves (cheese, spaghetti and noodle caves, cave entrances, ravines), water and lava pockets, ore veins, deepslate, bedrock, and the cave biomes: lush, dripstone and sulfur caves, and
   the deep dark under mountains. Structures (villages, mineshafts, strongholds and the rest) are vanilla's and use the biome tags.
+* **Flooded swamps and marshes:** low, flat land near the sea and the rivers stands at the sea level with pools and hummocks (about a third of it water, as in vanilla's swamps), in swamp or, in the warm,
+  mangrove swamp. They are 1 to 4% of the land, in patches of kilometres; the nearest is usually 4 to 9 km from the spawn (`/locate biome minecraft:swamp`). Swamp huts, witches' huts and the swamp's
+  ruined portals and abandoned camps come with them.
 * **Three biomes of its own,** so that islands can be found: `epicterrain:volcano`, `epicterrain:atoll` and `epicterrain:crater_lake`.
 
 There is no Customize screen; the settings are [startup options](#options-for-the-earth-world).
@@ -88,6 +93,9 @@ There is no Customize screen; the settings are [startup options](#options-for-th
 | `#epicterrain:earth_peaks`, `#epicterrain:earth_mountains`, `#epicterrain:earth_highlands` | the tall summits; mountains proper (with volcanoes, slopes and groves); the whole mountain band |
 | `#epicterrain:earth_open_ocean` | the open ocean, where the islands are |
 | `#epicterrain:earth_badlands` | the layered-rock country, where the climate reaches the hot badlands |
+
+Vanilla's own biomes can be searched for by name too: `/locate biome minecraft:swamp` (or `mangrove_swamp`), `windswept_hills`, `stony_shore`, `stony_peaks`, `deep_ocean`. The ocean monument is
+in the deep ocean past the continent, some 15 to 17 km from the spawn in the three worlds checked, so you sail first.
 
 `/locate biome minecraft:lush_caves` (or dripstone or sulfur caves) finds cave biomes underground. **A search that has found nothing stops after 5 seconds** with vanilla's "could not find" message,
 instead of freezing the server while it looks everywhere; so a rare thing can be reported missing when it is there. `/locate structure` and explorer maps use the same limit (see
@@ -140,7 +148,8 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | `crag` | 1 | Strength of the fine relief: 0 is smooth, 2 twice as craggy. |
 | `riverWidth` | 3 | Width of the smallest river, in blocks. |
 | `riverDepth`, `floodplain` | 1, 1 | Multiply the depth of every river and the width of every floodplain. |
-| `lapse`, `rainbias`, `variety` | 0.3, 0.5, 0.5 | How fast the climate cools with height; how far the simulated rainfall moves humidity (0 is pure vanilla, 1 is fully); how much the edges of the biome zones wander (0 is clean zones, 1 is a lot). |
+| `lapse`, `rainbias`, `variety` | 0.3, 0.5, 0.5 | How fast the climate cools with height; how far the simulated rainfall moves humidity (0 is pure vanilla, 1 is fully); how much the edges of the biome zones wander, and how common the windswept, rocky-coast and bare-summit patches are (0 is clean zones and none of them, 1 is a lot). |
+| `wetland` | 1 | How much of the low, flat land is marsh (swamp and mangrove swamp): 0 is none, 2 is more. |
 | `mushroom`, `volcanic`, `islandSize` | 4.1, 1, 1 | Mushroom islands per 1,000 km² of open ocean (4.1 is about vanilla's rate); a multiplier on how common volcanic islands are; a multiplier on the size of every island. |
 | `locateSeconds` | 5 | How long a `/locate` search may run before it gives up. |
 
@@ -154,7 +163,7 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | `/locate` says it could not find something that should be there. | The 5-second limit, or it is beyond 6,400 blocks. Raise `locateSeconds`, or travel. |
 | Distant Horizons fills in slowly. | It is generating real chunks through the Earth model; give it time, or lower its quality settings. |
 | A shader pack shows no distant terrain. | The pack probably does not support Distant Horizons. Try another pack, or turn Distant Horizons off. |
-| New chunks do not match old ones. | The options or the mod version differ from when the world was made (see [seeds](#seeds-saving-and-updating)). Version 1.1.0 curved the rock-layer bands, so an Earth world made with 1.0.0 shows a seam in the plains where new chunks begin; the options above set the 1.0.0 pattern back. |
+| New chunks do not match old ones. | The options or the mod version differ from when the world was made (see [seeds](#seeds-saving-and-updating)). Version 1.1.0 curved the rock-layer bands, so an Earth world made with 1.0.0 shows a seam in the plains where new chunks begin; the options above set the 1.0.0 pattern back. Version 1.2.0 added marshes and moved the biomes of many places, so a world made with 1.1.1 or earlier shows seams where new chunks begin (the biomes change, and the ground by a few blocks in marsh country); `-Depicterrain.earth.wetland=0` leaves the ground as it was, but not the biomes. |
 | An Earth world made with version 0.2.0 has no caves in the parts you explored before. | 0.2.0 had no caves; 1.0.0 puts caves in newly generated chunks only. |
 
 ## Known limitations
@@ -163,11 +172,13 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 * The simulation is not saved: every launch of a world simulates again (about a minute).
 * Riverbeds are plain dirt or gravel from the surface rules; there are no waterfalls, deltas or oxbow lakes yet.
 * Caves open the surface on about 8% of dry columns (vanilla's cave entrances), and where a cave lies just under the ground the surface can sit 1 to 3 blocks lower than the terrain model draws it (a fifth to two fifths of the columns in the land chunks tested); dripstone caves are most of the cave biomes at 30 to 80 blocks down, and lush caves are rare.
-* Structures on this terrain, the cave decoration and dedicated servers have not been tried; the classic carvers and the underground have had little play.
-* No glaciers or snowfields beyond what vanilla's biomes give; badlands appear only where the climate reaches them.
+* Structures: every overworld structure's start generated on the three seeds checked (the played world also has villages of five kinds, strongholds, ancient cities, trial chambers and more), but few of their
+  pieces have been seen in play; the cave decoration and dedicated servers have not been tried, and the classic carvers and the underground have had little play.
+* No glaciers or snowfields beyond what vanilla's biomes give; badlands appear only where the climate reaches them. The windswept savanna is rare (a tenth of a percent of the land, against vanilla's third),
+  and a marsh's edge follows the lie of the ground, so it is a shore and not a fade.
 
 ## Reporting problems
 
-Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.1.1), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
+Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.2.0), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
 what world type and seed, what you did, and the end of `.minecraft/logs/latest.log` (and the file in `.minecraft/crash-reports` if the game crashed). For terrain you think looks wrong, a screenshot with F3
 open and the coordinates is the most useful thing. How the mod works inside, and what has been measured, is in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

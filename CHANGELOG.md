@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 
 * **Flooded swamps and marshes.** Low, flat land near the sea and the rivers is now marsh: its ground stands at the sea level with pools and hummocks of some 40 blocks, about a third of it water (what
   vanilla's swamps measure), and its biome is swamp, or mangrove swamp in the warm. The ground and the biome come from one field, so a swamp is where the ground is marsh. Swamps and mangrove swamps are
