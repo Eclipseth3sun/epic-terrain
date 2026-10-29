@@ -1,21 +1,20 @@
 # Epic Terrain
 
-A Fabric mod for Minecraft Java 26.3 with two world types, both added *alongside* vanilla (the Default, Amplified and other presets are unchanged):
+A Fabric mod for Minecraft Java 26.3 that adds one world type, **Earth (prototype)**, *alongside* vanilla (the Default, Amplified and other presets are unchanged).
 
-* **Epic Terrain** adds dramatic mountain ranges to vanilla terrain: lines, arcs and bowls with foothills, and wall-like ranges that rise abruptly from the plain, with planned, carved rivers.
-  Vanilla terrain is never replaced; it is blended with. A world-creation slider says how much of the world is range country.
-* **Earth (prototype)** is a separate procedural world: a continent shaped by simulated plate tectonics, rock layers, erosion and climate, with rivers that run from the mountains to the sea, lakes,
-  islands in the open ocean (volcano chains, atolls, mushroom islands) and vanilla's caves, aquifers, ores and structures underneath. The biomes are vanilla's own, steered by the height and climate of
-  the simulated ground. The world is a 37.5 km square around the spawn, with deep ocean and islands beyond it.
+An Earth world is a procedural continent shaped by simulated plate tectonics, rock layers, erosion and climate, with rivers that run from the mountains to the sea, lakes, islands in the open ocean
+(volcano chains, atolls, mushroom islands) and vanilla's caves, aquifers, ores and structures underneath. The biomes are vanilla's own, steered by the height and climate of the simulated ground. The
+world is a 37.5 km square around the spawn, with deep ocean and islands beyond it.
 
-**Version 1.0.1.** 170 automated tests pass: they load the real world presets through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real launcher
-with Distant Horizons (version 0.2.0, before the caves came back); the caves, aquifers and cave biomes have had little play, and shaders, Voxy and dedicated servers have not been tried.
+**Version 1.0.1.** 107 automated tests pass: they load the real world preset through the game's own loaders and build real chunks headlessly. The author has played the Earth world in the real
+launcher in survival, with Distant Horizons, Sodium and Iris with a shader pack, and crossed the continent on horseback; the caves, aquifers and cave biomes have had little play, and Voxy and dedicated
+servers have not been tried. This version removed the mod's first world type ("Epic Terrain"): worlds made with it no longer open (see the [changelog](CHANGELOG.md)).
 
 ## Install
 
 You need Minecraft Java Edition **26.3**, [Fabric Loader](https://fabricmc.net/use/installer/) **0.20.1** or newer, and [Fabric API](https://modrinth.com/mod/fabric-api) **0.165.0+26.3**. Put the Fabric API jar
-and `epicterrain-1.0.1.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Epic Terrain**
-or **Earth (prototype)**. An Earth world simulates its continent when it loads and takes about a minute to start.
+and `epicterrain-1.0.1.jar` (from the [Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) page) in your `mods` folder, create a world, and under **More** > **World Type** pick **Earth (prototype)**.
+An Earth world simulates its continent when it loads and takes about a minute to start.
 
 For a far view and shaders, these were checked against Modrinth's lists for 26.3:
 
@@ -23,23 +22,23 @@ For a far view and shaders, these were checked against Modrinth's lists for 26.3
 |---|---|---|
 | [Sodium](https://modrinth.com/mod/sodium) | 0.9.2 | required by Iris and Voxy; not the 0.9.3 beta |
 | [Iris Shaders](https://modrinth.com/mod/iris) | 1.11.7 | needs Sodium 0.9.2 |
-| [Distant Horizons](https://modrinth.com/mod/distanthorizons) | 3.3.4 | recommended for the Earth world: it generates the distant terrain itself |
+| [Distant Horizons](https://modrinth.com/mod/distanthorizons) | 3.3.4 | recommended: it generates the distant terrain itself |
 | [Voxy](https://modrinth.com/mod/voxy) | 0.2.20-beta | alternative; shows only terrain you have loaded |
 
-**[The user guide](USER_GUIDE.md)** has the full installation steps, how each world type works, the Earth world's startup options, finding things with `/locate`, troubleshooting, and the known limitations.
+**[The user guide](USER_GUIDE.md)** has the full installation steps, how the world works, its startup options, finding things with `/locate`, troubleshooting, and the known limitations.
 
 ## Build from source
 
 ```bash
 ./gradlew assemble     # writes build/libs/epicterrain-1.0.1.jar (no tests)
-./gradlew test         # the whole suite, about 11 minutes
+./gradlew test         # the whole suite, about 2 minutes
 ./gradlew runClient    # a development client with the mod
 ```
 
 ## More
 
 * [CHANGELOG.md](CHANGELOG.md): what is in each version.
-* [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): how the mod works inside (the Epic range model, the Earth simulation, rivers, islands, the underground, the searches), what was measured, and what is not done.
+* [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): how the mod works inside (the Earth simulation, rivers, islands, the underground, the searches), what was measured, and what is not done.
 * The worldgen datapack under `src/main/resources/data` is generated by `tools/gen_worldgen.py` from the Minecraft game jar; do not edit it by hand.
 
 ## License

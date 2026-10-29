@@ -5,10 +5,7 @@
       "type": "minecraft:condition",
       "if_true": {
         "type": "minecraft:biome",
-        "biome_is": [
-          "minecraft:frozen_peaks",
-          "epicterrain:epic_range_peaks"
-        ]
+        "biome_is": "minecraft:frozen_peaks"
       },
       "then_run": "minecraft:overworld/under_biome_surface/frozen_peaks"
     },
@@ -24,10 +21,7 @@
       "type": "minecraft:condition",
       "if_true": {
         "type": "minecraft:biome",
-        "biome_is": [
-          "minecraft:jagged_peaks",
-          "epicterrain:epic_wall_peaks"
-        ]
+        "biome_is": "minecraft:jagged_peaks"
       },
       "then_run": "minecraft:overworld/under_biome_surface/jagged_peaks"
     },
@@ -35,10 +29,7 @@
       "type": "minecraft:condition",
       "if_true": {
         "type": "minecraft:biome",
-        "biome_is": [
-          "minecraft:grove",
-          "epicterrain:foothills_cold"
-        ]
+        "biome_is": "minecraft:grove"
       },
       "then_run": "minecraft:overworld/under_biome_surface/grove"
     },

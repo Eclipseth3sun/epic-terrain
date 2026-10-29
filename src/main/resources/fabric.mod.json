@@ -3,7 +3,7 @@
 	"id": "epicterrain",
 	"version": "${version}",
 	"name": "Epic Terrain",
-	"description": "Two world types: Epic Terrain, with mountain ranges and foothills blended into vanilla terrain, and Earth (prototype), a continent shaped by simulated tectonics, erosion and climate, with rivers, lakes, islands and vanilla's caves.",
+	"description": "Earth (prototype): a world type whose continent is shaped by simulated plate tectonics, erosion and climate, with rivers, lakes, islands in the open ocean, and vanilla's caves and structures.",
 	"authors": [
 		"Eclipseth3sun"
 	],
@@ -22,11 +22,7 @@
 		]
 	},
 	"mixins": [
-		"epicterrain.mixins.json",
-		{
-			"config": "epicterrain.client.mixins.json",
-			"environment": "client"
-		}
+		"epicterrain.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.20.1",

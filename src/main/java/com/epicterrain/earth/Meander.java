@@ -1,7 +1,8 @@
-package com.epicterrain.river;
+package com.epicterrain.earth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 
 /**
@@ -65,7 +66,7 @@ public final class Meander {
 	 * @param line  the routed line, points about evenly spaced
 	 * @param width the river's width at a distance travelled along {@code line}
 	 */
-	public static List<double[]> apply(List<double[]> line, DoubleUnaryOperator width, TerrainView terrain, long seed) {
+	public static List<double[]> apply(List<double[]> line, DoubleUnaryOperator width, DoubleBinaryOperator terrain, long seed) {
 		int n = line.size();
 		if (n < 2 * GRADE_WINDOW + 1) {
 			return line;
@@ -80,7 +81,7 @@ public final class Meander {
 			if (i > 0) {
 				s[i] = s[i - 1] + Math.hypot(x[i] - x[i - 1], z[i] - z[i - 1]);
 			}
-			ground[i] = terrain.roughGround(x[i], z[i]);
+			ground[i] = terrain.applyAsDouble(x[i], z[i]);
 		}
 		double length = s[n - 1];
 
@@ -119,7 +120,7 @@ public final class Meander {
 			if (Math.abs(swing[i]) >= 0.5) {
 				ease[i] = 0.0;
 				for (double e : EASE) {
-					double groundThere = terrain.roughGround(x[i] + nx[i] * swing[i] * e, z[i] + nz[i] * swing[i] * e);
+					double groundThere = terrain.applyAsDouble(x[i] + nx[i] * swing[i] * e, z[i] + nz[i] * swing[i] * e);
 					if (groundThere <= ground[i] + CLIMB + 0.25 * w) {
 						ease[i] = e;
 						break;

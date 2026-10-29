@@ -1,11 +1,5 @@
 {
   "values": [
-    "epicterrain:foothills_dry",
-    "epicterrain:foothills_wet",
-    "epicterrain:foothills_temperate",
-    "epicterrain:foothills_cold",
-    "epicterrain:epic_range_peaks",
-    "epicterrain:epic_wall_peaks",
     "epicterrain:volcano"
   ]
 }

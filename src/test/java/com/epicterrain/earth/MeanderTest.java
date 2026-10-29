@@ -1,4 +1,4 @@
-package com.epicterrain.river;
+package com.epicterrain.earth;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,24 +13,6 @@ import org.junit.jupiter.api.Test;
 
 /** How a routed line is given its bends. */
 class MeanderTest {
-	/** Ground given by a function of position; everything else the planner could ask is irrelevant here. */
-	private record Ground(DoubleBinaryOperator height) implements TerrainView {
-		@Override
-		public double ground(double x, double z) {
-			return this.height.applyAsDouble(x, z);
-		}
-
-		@Override
-		public double uplift(double x, double z) {
-			return 0;
-		}
-
-		@Override
-		public double land(double x, double z) {
-			return 0.3;
-		}
-	}
-
 	private static List<double[]> straight(double length, double spacing) {
 		List<double[]> line = new ArrayList<>();
 		for (double s = 0; s <= length + 1e-9; s += spacing) {
@@ -67,7 +49,7 @@ class MeanderTest {
 
 	@Test
 	void aWideRiverOnFlatGroundWindsAndStaysSmooth() {
-		TerrainView flat = new Ground((x, z) -> 80.0);
+		DoubleBinaryOperator flat = (x, z) -> 80.0;
 		List<double[]> line = straight(8000, 16);
 		List<double[]> bent = Meander.apply(line, t -> 60.0, flat, 7L);
 		assertEquals(line.size(), bent.size());
@@ -93,7 +75,7 @@ class MeanderTest {
 
 	@Test
 	void aBendIsNeverTighterThanTheRiverIsWide() {
-		TerrainView flat = new Ground((x, z) -> 80.0);
+		DoubleBinaryOperator flat = (x, z) -> 80.0;
 		for (double width : new double[] { 12.0, 30.0, 60.0, 140.0 }) {
 			for (long seed = 1; seed <= 6; seed++) {
 				List<double[]> bent = Meander.apply(straight(12000, 16), t -> width, flat, seed);
@@ -106,7 +88,7 @@ class MeanderTest {
 
 	@Test
 	void theTwoEndsStayWhereTheyAre() {
-		TerrainView flat = new Ground((x, z) -> 80.0);
+		DoubleBinaryOperator flat = (x, z) -> 80.0;
 		List<double[]> line = straight(5000, 16);
 		List<double[]> bent = Meander.apply(line, t -> 40.0, flat, 11L);
 		assertArrayEquals(line.get(0), bent.get(0), 1e-9, "the source stays put");
@@ -119,7 +101,7 @@ class MeanderTest {
 	@Test
 	void aSteepRiverKeepsTheLineItWasRouted() {
 		// a grade of one block in five
-		TerrainView steep = new Ground((x, z) -> 400.0 - 0.2 * x);
+		DoubleBinaryOperator steep = (x, z) -> 400.0 - 0.2 * x;
 		List<double[]> line = straight(3000, 16);
 		List<double[]> bent = Meander.apply(line, t -> 40.0, steep, 3L);
 		for (int i = 0; i < line.size(); i++) {
@@ -130,11 +112,11 @@ class MeanderTest {
 	@Test
 	void aBendNeverClimbsOutOfTheValley() {
 		// a valley whose floor is the x axis and whose sides rise steeply: the river may wind within the floor, not up the sides
-		TerrainView valley = new Ground((x, z) -> 80.0 + Math.max(0.0, Math.abs(z) - 12.0) * 2.0);
+		DoubleBinaryOperator valley = (x, z) -> 80.0 + Math.max(0.0, Math.abs(z) - 12.0) * 2.0;
 		List<double[]> line = straight(6000, 16);
 		List<double[]> bent = Meander.apply(line, t -> 60.0, valley, 5L);
 		for (double[] p : bent) {
-			double rise = valley.ground(p[0], p[1]) - 80.0;
+			double rise = valley.applyAsDouble(p[0], p[1]) - 80.0;
 			assertTrue(rise <= Meander.CLIMB + 0.25 * 60.0 + 1.0, "a bend climbed " + rise + " blocks at " + p[0] + "," + p[1]);
 		}
 		assertTrue(bent.stream().anyMatch(p -> Math.abs(p[1]) > 2.0), "it should still wind a little inside the floor");
@@ -142,7 +124,7 @@ class MeanderTest {
 
 	@Test
 	void theSameInputsGiveTheSameBendsAndADifferentSeedGivesDifferentOnes() {
-		TerrainView flat = new Ground((x, z) -> 80.0);
+		DoubleBinaryOperator flat = (x, z) -> 80.0;
 		List<double[]> line = straight(4000, 16);
 		List<double[]> a = Meander.apply(line, t -> 50.0, flat, 21L);
 		List<double[]> b = Meander.apply(line, t -> 50.0, flat, 21L);
@@ -159,7 +141,7 @@ class MeanderTest {
 
 	@Test
 	void wideRiversHaveLongBendsAndNarrowOnesShort() {
-		TerrainView flat = new Ground((x, z) -> 80.0);
+		DoubleBinaryOperator flat = (x, z) -> 80.0;
 		List<double[]> line = straight(8000, 16);
 		int narrow = zeroCrossings(Meander.apply(line, t -> 6.0, flat, 9L));
 		int wide = zeroCrossings(Meander.apply(line, t -> 90.0, flat, 9L));

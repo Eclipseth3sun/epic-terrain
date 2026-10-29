@@ -1,5 +1,0 @@
-{
-  "type": "minecraft:add",
-  "left": "epicterrain:overworld/y_gradient",
-  "right": "epicterrain:overworld/offset"
-}

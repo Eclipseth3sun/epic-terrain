@@ -483,9 +483,7 @@
               "type": "minecraft:biome",
               "biome_is": [
                 "minecraft:frozen_peaks",
-                "minecraft:jagged_peaks",
-                "epicterrain:epic_range_peaks",
-                "epicterrain:epic_wall_peaks"
+                "minecraft:jagged_peaks"
               ]
             },
             "then_run": {

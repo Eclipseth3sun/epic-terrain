@@ -1,21 +1,6 @@
 {
-  "biome.epicterrain.foothills_cold": "Epic Foothills (Cold)",
-  "biome.epicterrain.foothills_temperate": "Epic Foothills (Temperate)",
-  "biome.epicterrain.foothills_dry": "Epic Foothills (Dry)",
-  "biome.epicterrain.foothills_wet": "Epic Foothills (Wet)",
-  "biome.epicterrain.epic_river": "Epic River",
-  "biome.epicterrain.epic_frozen_river": "Epic Frozen River",
-  "biome.epicterrain.epic_grand_river": "Epic Grand River",
-  "biome.epicterrain.epic_frozen_grand_river": "Epic Frozen Grand River",
   "biome.epicterrain.volcano": "Volcano",
   "biome.epicterrain.atoll": "Atoll",
   "biome.epicterrain.crater_lake": "Crater Lake",
-  "generator.epicterrain.earth": "Earth (prototype)",
-  "generator.epicterrain.epic": "Epic Terrain",
-  "biome.epicterrain.epic_range_peaks": "Epic Range Peaks",
-  "biome.epicterrain.epic_wall_peaks": "Epic Wall Peaks",
-  "epicterrain.customize.title": "Customize Epic Terrain",
-  "epicterrain.customize.amount": "Epic Terrain: %s%%",
-  "epicterrain.customize.hint.scale": "How much of the world is epic mountain country. 1% is a few lone massifs; 100% is ranges everywhere.",
-  "epicterrain.customize.hint.default": "Default: %s%%. The rest of the world generates exactly like vanilla."
+  "generator.epicterrain.earth": "Earth (prototype)"
 }

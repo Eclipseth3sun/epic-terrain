@@ -1,198 +1,46 @@
 # Development notes
 
-How the mod is built, how its two world types work inside, what was measured, and what is not done. For installing and playing, see [the user guide](../USER_GUIDE.md); for the
+How the mod is built, how the Earth world works inside, what was measured, and what is not done. For installing and playing, see [the user guide](../USER_GUIDE.md); for the
 list of changes, [the changelog](../CHANGELOG.md). The long sections on the Earth world type are a working log: each says when it was written and what was and was not checked then.
+The mod's first world type, "Epic Terrain" (mountain ranges blended into vanilla terrain, with planned rivers and a Customize slider), was removed in 1.0.1; where the log below mentions
+it, that is history, and the code is in the 1.0.0 tag.
 
 ## Development
 
 ```
 ./gradlew build          # compile + run the tests
 ./gradlew runClient      # launch Minecraft with the mod (singleplayer testing)
-./gradlew preview        # render terrain maps to build/preview (see below)
+./gradlew preview        # render terrain maps to build/preview (the Earth sections below say which tests)
 python tools/gen_worldgen.py   # regenerate the worldgen JSON after changing a constant
 ```
 
-The worldgen JSON under `src/main/resources/data/epicterrain` is **generated** by `tools/gen_worldgen.py`. Every
-tunable constant sits in the `TUNE` block at the top of that script (range sizes, shape shares, widths, heights);
-vanilla functions are read out of the game jar and rewritten, so don't edit the generated JSON by hand.
+The worldgen JSON under `src/main/resources/data/epicterrain` is **generated** by `tools/gen_worldgen.py`. The terrain itself is made by Java (the Earth model); the script writes the datapack around
+it, and the few constants it has sit in the `TUNE` block at the top. Vanilla functions are read out of the game jar and rewritten, so don't edit the generated JSON by hand.
 
 ### Code map
 
 | Piece | Where | What it does |
 | --- | --- | --- |
-| `RangeField` | `worldgen/` | custom density function: places the lines, arcs and bowls, and returns their height / kind / distance |
-| `EpicChunkGenerator` | `worldgen/` | vanilla's noise generator plus the slider percentage; bakes it into an in-memory copy of the noise settings |
-| `EpicAmount` | `worldgen/` | slider percent -> range occupancy |
-| `ConfigSubstitution` | `worldgen/` | inlines density-function references and swaps the occupancy, without touching the registry |
-| `EpicBiomeSource` | `worldgen/` | vanilla multi-noise source plus "epic zones" (see below) |
-| `RangeShape`, `RangeCatalog` | `worldgen/` | the ranges as geometry (spine line, arc or bowl), read from the very sampler that shapes the terrain |
-| `RiverPlanner` and friends | `river/` | plans rivers over the ground: routing, water level, widths, waterfalls (see "Rivers") |
-| `RiverService`, `RiverServices` | `river/` | one shared, cached answer to "which river governs this column?": plans on background threads, a spatial index, prefetch |
-| `Channel`, `RiverCarver` | `river/` | the shape a river gives the ground (bed, gorge walls, a small lip) and the column-by-column carving, with a stone floor under the bed and plugged cave openings; free of Minecraft types so it is tested on arrays |
-| `Meander` | `river/` | the bends of a routed river (pure; smooths the router's line to the river's width, then winds it: wavelength follows width, reach follows how gentle the grade is) |
-| `RiverField` | `worldgen/` | density function: the river zone code (4 or 5) for every column a river reshapes, so the biome source can label it |
-| `RiverChannelFeature` | `worldgen/` | the feature that cuts the channel and fills it with water; first in the decoration of the river biomes |
-| `RiverRuntime` | `worldgen/` | keeps planning ahead of generation: prefetch around players and at level load |
-| `EpicCustomizeScreen`, `EpicPresetEditor` | `src/client/` | the Customize screen and its hookup |
-| `WorldCreationUiStateMixin` | `src/client/` | vanilla keeps preset editors in an immutable map; this adds ours |
+| `EpicTerrain` | root | the entry point: registers the chunk generator, biome source and density function type |
+| `Tectonics`, `PlateGrid`, `ContinentSimulator`, `Continent`, `Erosion`, `Climate` | `earth/` | the simulation of the continent: plates, uplift, erosion, rainfall and temperature (see the sections below) |
+| `Landscape`, `Strata`, `Detail`, `Noise` | `earth/` | what is added to the simulated skeleton: rock layers, walking-scale relief, shared noise |
+| `Rivers`, `Meander`, `RiverValley` | `earth/` | rivers from the simulation's own drainage, their bends, and the valley each cuts into the ground |
+| `Islands`, `BiomeClimate`, `EarthMetrics`, `EarthConfig` | `earth/` | islands in the open ocean, the biome mapping, measurements for the tests, and the `-Depicterrain.earth.*` options |
+| `EarthWorld`, `EarthWorlds` | `earth/` | the simulated window behind one call, `sample(x, z)`; one per world seed, kept until the server stops |
+| `EarthField` | `worldgen/` | the density function that turns that call into ground (`earth/density`, `earth/surface`, `earth/land`) |
+| `EarthChunkGenerator`, `EarthFluidPicker` | `worldgen/` | vanilla's noise generator with the water level asked of the model column by column |
+| `EarthBiomeSource` | `worldgen/` | vanilla's multi-noise table asked about the model's numbers, the three island biomes, and the cave biomes underground |
+| `SearchBudget` | `worldgen/` | the 5-second limit on `/locate` and the other searches |
+| `NoiseBasedAquiferMixin` | `mixin/` | keeps vanilla's aquifers below the ground so that rivers above the sea keep their water |
 | `epicterrain.accesswidener` | resources | makes `NoiseBasedChunkGenerator` extendable (vanilla marks it final) |
 
-The generator is only constructed where registries are already bound: from the Customize screen, or when a world's
-`level.dat` is read. The datapack preset itself uses plain `minecraft:noise` (preset entries are decoded before the
-noise settings they refer to are bound, so the derived settings cannot be built there).
-
-### Epic zones
-
-Terrain and biomes are computed separately, and the biome source only sees six climate numbers. The climate functions
-therefore carry a *zone number* in the temperature channel (`temperature + 8 * zone`); `EpicBiomeSource` strips it before
-vanilla picks a biome. Zone 1 and 2 are the summits (they replace vanilla's peak biomes with the epic peak biomes); zone 3
-is everything else a range touches (each vanilla land biome is swapped for its foothill biome). A summit zone also falls back
-to the foothill biome for any land vanilla did not call a peak, so nothing epic stays unlabelled. Zones 4 and 5 are the
-corridors of tributaries and grand rivers (see "Rivers"); a river's label wins over a range's where they overlap. Caves and
-everything else keep vanilla biomes. Adding a new locatable feature means adding a zone code and a biome. Worlds saved by
-earlier builds (zones listed as bare ids, or only the three range zones) still load; they simply have no rivers.
-
-Foothill biomes are assembled from vanilla pieces, and Minecraft refuses to start if two biomes list the same features in
-conflicting orders, so the generator merges feature lists using one global order derived from every vanilla biome
-(`feature_order` in the script), and a test runs Minecraft's own order check over all biomes.
-
-### Previewing terrain without launching the game
-
-`./gradlew preview` loads the vanilla datapack plus this mod's data through the game's own registry loader and renders
-top-down height maps, biome maps (cyan = foothill-range summit, magenta = wall-range summit, orange = foothills), and
-vertical cross-sections to `build/preview`. Options are passed as system properties:
-
-```
-./gradlew preview -Depicterrain.only=epic -Depicterrain.amount=50 -Depicterrain.cx=2816 -Depicterrain.cz=-7424 \
-                  -Depicterrain.wpp=32 -Depicterrain.slice=true -Depicterrain.fields=range/uplift
-```
-
-| Property | Meaning |
-| --- | --- |
-| `only` | `epic` or `vanilla` (default: both) |
-| `amount` | preview the epic world with the slider at this percent |
-| `cx`, `cz` | view centre in blocks |
-| `wpp` / `mpp` | blocks per pixel for the wide / mid view (512 px / 256 px) |
-| `slice`, `sliceWidth` | also render a west-east cross-section through `cz` |
-| `fields` | comma-separated 2D density functions to render as raw heat maps (try `range/uplift`, `range/distance`) |
-| `exact` | scan the true 3D density in the mid view (slow) |
-| `seed` | world seed (default 4242) |
-
-### Rivers
-
-Rivers are planned from the ranges, then cut into the world by a feature while chunks generate. The plan (`river/`) is a pure function
-of the world seed, the range and the terrain, so any chunk can ask for the rivers near it and always get the same answer.
-
-* **Tributaries:** each range gets a few (about 0.6 per km of spine, 2 to 6) that rise high on the flanks and end in the first vanilla
-  water body of at least 1 km2, or in an earlier river of the same range 400+ blocks downstream of its source. Ponds on the way are
-  crossed, and no tributary strays more than 6 km from its source.
-* **Grand river:** each range has a 5% chance of one (**temporarily 15%** in `tools/gen_worldgen.py` while they are tuned: change
-  `grand_chance` back and re-run the script), which runs to the nearest ocean body of at least 10 km2 within 20 km (if there
-  is none, it gets none). The size is what counts, not "deep": vanilla's oceans are many small patches, hot climates have no deep ocean
-  biome at all, and the biggest body in 160 x 160 km is only about 35 km2. Each grand river is logged when it is planned
-  (`Grand river of range ...: source at x, z, mouth at x, z`), so `logs/latest.log` says where to go and look.
-* **Routing** (`RiverRouter`) is a search over the ground where the state is the cell *and the water level*. The level can only fall, it
-  follows the ground down (two blocks beneath it), never goes below sea level, and a step costs more the more it digs (`digCharge`), so a
-  river runs down into the lowlands and digs through a bump only when it must. A river that would need a gorge deeper than 80 blocks is
-  dropped. After its steep flank a grand river runs at sea level, so vanilla rivers (all at sea level) meet it flush, and inside its own
-  corridor the grand river takes priority over everything else.
-* **Ground** (`WorldTerrain`) is found by searching the terrain density for the highest solid block, which matches a generated world to
-  within a block or two. Vanilla's own surface-level function is deliberately 12 to 25 blocks low and would flood the lowlands. Routing
-  explores with a cheap estimate (where the terrain curve crosses zero) and only the final river is measured exactly.
-* **Profiles:** width grows from the source to a mouth width that grows with the river's length (tributaries 8 to 28 blocks, grand rivers
-  70 to 140), depth gets most of its value by halfway so the lower river is wider rather than deeper, and the last stretch flares to twice
-  the width. Falls are the steep reaches (5+ blocks per 32): slender plunges, stepped cascades, wide curtains. (Today a steep reach is a
-  steep channel with stepped water; shaping proper waterfalls is the next phase.)
-* **Bends** (`Meander`): the router's line is a path over a 64-block grid, which is nearly straight over flat ground and turns far
-  tighter than a wide channel can. So each river's line is first smoothed to the scale of its width (a Gaussian a little over one width
-  across, ends fixed), then pushed sideways by an alternating swing whose wavelength is about 18 river widths (200 to 3000 blocks) and
-  whose size is up to 34% of a wavelength, but never so much that a bend's radius at its tightest falls under 1.3 widths. The swing
-  fades out as the grade steepens (full at under 2 blocks of fall per 100, none from 15), never carries a bend up a valley side, never
-  pushes a node toward the inside of a turn by more than half that turn's radius (that folds the line over itself, as an offset curve
-  does), changes by at most 2 blocks of push per block of river wherever something holds it back (corners are rounded), and is eased to
-  nothing at both ends so the source and the mouth (which has to meet its sea or river) stay put. Measured on a real world (arc length
-  over chord, 288-block stretches): tributaries 1.16 / 1.27 / 1.22 through their upper, middle and lower thirds, rivers 10 to 20 blocks
-  wide 1.24 (they were 1.12), grand rivers about 1.2; steep narrow ones stay close to 1.
-* **Banks:** a river is cut into the ground, never built up. The planner looks at the ground a couple of blocks beyond the water's edge on
-  both sides at every node and sets the water no higher than the lower bank (but at most 10 blocks below its own line), so on a
-  hillside the river sits down in the slope. Only where the generated ground comes out a little lower than planned does the carver add
-  a lip, at most 2 blocks high and 3 wide, built from the column's own materials (the surface block on top, what lay under it below),
-  so it looks like the ground around it and never like a dirt shelf.
-* **In the world:** `RiverChannelFeature` runs first in the decoration of the four epic river biomes, once per chunk that contains one.
-  For every column it decides from the plan and the generated ground: inside the channel, a parabolic bed (gravel) under flat water;
-  outside it, ground above a wall that rises 0.8 blocks per block from the water's edge is cut away (so a river through a hill cuts a
-  V-shaped gorge), and the small lip described above tops up a bank that came out low. The ground of a column is read through any leaves
-  or logs of a tree from the chunk next door. The four river biomes also leave out vanilla's `spring_water`, which loves the rock faces a
-  gorge exposes and then pours sheets of water down the hillside. Ground already under vanilla water is never raised. A gorge can cut
-  into the caves under it, and water must not hang over those: the bed of any river above sea level stands on four solid blocks (the
-  gravel and three of stone, filled in wherever the ground under it is hollow), and cave air that touches the water from the side, under a
-  roof, is plugged with stone (this one reaches a block into the neighbouring chunk, which is allowed and only ever turns air that touches
-  water into stone). Air open to the sky beside the water (a low bank or a cliff's edge) is left alone: that is for the planner and for
-  waterfalls. Beyond the river's reach nothing is touched. Columns are decided independently, so chunks agree at their borders; water is placed as still source blocks
-  (it only flows if something disturbs it; making steep reaches flow as real waterfalls is part of the next phase).
-* **Labels:** `RiverField` gives every dry column a river reshapes the zone code 4 (tributary) or 5 (grand), and the biome source turns that
-  into the matching epic river biome (frozen where vanilla was cold). A river keeps its label where it crosses a range.
-* **Planning off the generation path:** `RiverService` plans each range once, on its own low-priority threads, and answers from a spatial
-  index. `RiverRuntime` starts the plans for the country around every player (and the origin when a level loads), so by the time chunks
-  there generate their plans are usually done. A chunk that gets ahead of that waits for exactly the plans geometry says it depends on
-  (nearby ranges and the rare ranges with a grand river in reach), and the server thread (commands such as `/locate`) never waits and
-  uses what is ready. First-look waits (seed 4242, with the temporary 15% grand chance; at the design 5% they were about 1 s, 6-8 s
-  and 27-31 s): 4 s at the default 20% slider, 14 s at 50%, 70 s at 100%.
-* All numbers live in `RiverConfig` (plain Java defaults for now), and the grand chance is the `grand_chance` entry of the generator
-  script.
-
-```
-./gradlew preview --tests com.epicterrain.river.RiverPreviewTest -Depicterrain.seed=4242 -Depicterrain.amount=50                   -Depicterrain.cx=0 -Depicterrain.cz=0 -Depicterrain.wpp=24 [-Depicterrain.grand=0.05] [-Depicterrain.sea=10]
-```
-
-draws the terrain with the planned rivers (cyan tributaries, magenta grand rivers, red rings waterfalls, green sources, white mouths,
-the dashed lines the range spines, a dark wash the ocean bodies big enough to be a grand river's destination), prints statistics, and
-writes a long profile (ground and water level against distance) of the longest grand river and tributary to `build/preview`.
-`RiverSweepTest` compares settings, `RiverServiceTimingProbe` times the first look at a new area, and `GroundAccuracyProbe` checks the
-ground estimate against columns sampled from a played world.
-
-### Mapping a world you have played
-
-`tools/worldmap/map_world.py` (needs Python with numpy and Pillow) reads a world's saved region files and draws what the
-game really generated: terrain, the epic biome labels (cyan/magenta summits, orange foothills), and, if you give it a vanilla
-baseline for the same seed, how far the terrain differs from vanilla and whether every difference is labelled.
-
-```
-# 1. the seed and explored bounds are in the world: data/minecraft/world_gen_settings.dat and the region/ file names
-./gradlew preview --tests com.epicterrain.VanillaBaselineTest -Depicterrain.seed=<seed> -Depicterrain.bbox=x0,z0,x1,z1                   -Depicterrain.step=16 -Depicterrain.baselineOut=build/worldmap/vanilla_baseline.bin
-# 2. draw the maps and the comparison
-python tools/worldmap/map_world.py "run/saves/<world>" build/worldmap 3 build/worldmap/vanilla_baseline.bin
-```
-
-`bbox` is the explored area in blocks (a multiple of the step, aligned to 512-block regions). Cells are compared as the median
-ground height of a 16 x 16 block cell against the median of a 3 x 3 grid of vanilla columns, because a single column can land in a
-cave-entrance shaft and read tens of blocks low. Even far from any epic terrain about 1% of cells differ by more than 10 blocks
-(steep slopes, structures, cave mouths): that is the noise floor to compare against.
-
-### Checking the rivers of a world you have played
-
-Besides the terrain comparison above, three scripts in `tools/worldmap` read a world's region files and check what the rivers did:
-
-```
-# which rivers are planned in an area? (writes their nodes; the seed and slider are in the world's world_gen_settings.dat)
-./gradlew preview --tests com.epicterrain.river.RiverNodesProbe -Depicterrain.seed=<seed> -Depicterrain.amount=<slider>                   -Depicterrain.bbox=x0,z0,x1,z1 -Depicterrain.nodesOut=river_nodes.csv
-python tools/worldmap/check_nodes.py "run/saves/<world>" river_nodes.csv      # planned water level and bed height vs the generated blocks
-python tools/worldmap/scan_river_world.py "run/saves/<world>"                 # river biome cells, water above sea level, flowing water
-python tools/worldmap/render_spot.py "run/saves/<world>" <x> <z> <half> out.png river_nodes.csv   # a top-down picture of one spot
-./gradlew preview --tests com.epicterrain.river.RiverFindProbe -Depicterrain.seed=<seed> -Depicterrain.amount=<slider>   # grand rivers to teleport to
-```
-
-Note for anyone writing their own reader: since 26.x a block-state palette is a mixed list, so plain blocks are stored as `{'': 'minecraft:stone'}`
-and blocks with properties as `{id, properties}` (not `Name` / `Properties`); the scripts above handle both.
-
-`/locate biome` searches only 6,400 blocks, and grand rivers are rare (about one range in twenty, and only if a 10 km2 sea is within 20 km),
-so use `RiverFindProbe` to find one.
+The generator is only constructed where registries are already bound, and never calls `Holder.value()` while a codec builds it: registries load in parallel, so a holder that is not yet
+bound would fail the load. `EarthFluidPicker` takes the settings lazily for that reason.
 
 ### The Earth-like terrain prototype (`com.epicterrain.earth`, stage A)
 
-A second, separate model of the world, built offline and not yet connected to the game: continents that come out of simulated plate
-tectonics, erosion and climate instead of layered noise. It shares no code with the range and river model above (it is meant to become
-its own world type). Everything is in real units (metres, years) and is compressed into blocks at the end: a block of height is 10.6 m,
+The model behind the Earth world type, first written as an offline prototype and connected to the game in a later stage (below): continents that come out of simulated plate
+tectonics, erosion and climate instead of layered noise. Everything is in real units (metres, years) and is compressed into blocks at the end: a block of height is 10.6 m,
 and a block of width is `steepness` times that.
 
 * **Plates** (`Tectonics`, `PlateGrid`): a jittered Voronoi grid of plates about 25 km across (edges wobbled by noise), a pure function of
@@ -290,8 +138,8 @@ erosion, weirdness and continentalness every few hundred blocks, where here they
 
 ### Walking-scale detail (`Detail`)
 
-The simulation works on 32-block cells, so by itself the ground is smooth between cells: over 16 blocks (the baseline used for the old epic ranges
-and vanilla) it averages 1 degree in the lowlands, 4 in the foothills and 8 in the montane band, subalpine ground and peaks, with nothing steeper
+The simulation works on 32-block cells, so by itself the ground is smooth between cells: over 16 blocks (the baseline used for vanilla and for the removed Epic
+ranges) it averages 1 degree in the lowlands, 4 in the foothills and 8 in the montane band, subalpine ground and peaks, with nothing steeper
 than 30 degrees. `Detail` lays the walking-scale relief back over a bicubic reading of the simulated heights, as a function of position only (so
 any chunk can ask for any column and neighbours agree):
 
@@ -326,7 +174,7 @@ any chunk can ask for any column and neighbours agree):
 ### Rivers of the Earth model (`Rivers`)
 
 Decision (2026-10-28): the Earth world type does not use the planned grand-river model; its rivers come from the simulation's own drainage, and the
-widths follow one rule. (The original Epic world type is unchanged and keeps its grand rivers, still at the temporary `grand_chance` of 0.15.)
+widths follow one rule. (The planned grand-river model belonged to the Epic world type, since removed.)
 
 - **Where:** every cell drains to one neighbour and a cell is a river where at least 400,000 square blocks (180 km2 real) drain through it. That
   tree is cut into rivers: each starts at a source and follows its cells downstream, carrying on through a confluence along the branch that
@@ -355,7 +203,7 @@ widths follow one rule. (The original Epic world type is unchanged and keeps its
 
 ### River valleys of the Earth model (`RiverValley`)
 
-The user said (2026-10-28) that carving rivers should NOT be done the way the Epic world type did it: "it straight up looked unnatural". That
+The user said (2026-10-28) that carving rivers should NOT be done the way the Epic world type (since removed) did it: "it straight up looked unnatural". That
 approach cut a channel into ground that knew nothing of the river (a parabolic bed under flat water, walls at a fixed 0.8 slope, a lip along the
 bank, a bed floor, cave seals, water placed afterwards by a feature). Here the river is one more term in the ground's height function and the water
 is only "wherever the ground is under the river's level", so the ground and the water cannot disagree and nothing has to be patched up:
@@ -537,19 +385,20 @@ Vanilla's search looks within 6.4 km of the player: mushroom islands come about 
 will usually find none; from a boat in the open ocean it will.
 
 **Volcano, atoll and crater lake biomes** (added the same day at the user's request). Volcanoes, atolls and crater lakes are terrain, so they have three small biomes
-of their own, written by `tools/gen_worldgen.py` like the Epic river biomes: each is a copy of a vanilla biome (`volcano` of stony peaks, `atoll` of beach,
+of their own, written by `tools/gen_worldgen.py` (as the river biomes of the Epic type were): each is a copy of a vanilla biome (`volcano` of stony peaks, `atoll` of beach,
 `crater_lake` of river) and is added to every vanilla tag that biome is in, and to the surface rules that name it, so it gets the same mobs, surface and
 structures (an atoll is a beach for turtles and beached shipwrecks, a volcano a mountain biome, a crater lake a river). `Islands.highlight` says where they apply:
 a crater lake's water; the summit zone of a young volcano (inside 45% of its radius and 30 blocks or more above the sea, hundreds of blocks across); an atoll's reef
 flat and islets (a little wider than the reef, no deeper than 3 blocks). A volcano summit is therefore bare stony peak and not the snowy peak the lapse rate would
 give. `EarthIslandsTest` checks it on 45 volcano summits (8 with a crater lake) and 7 atolls, and `EarthTagsTest` the tags and the copies of vanilla's tags.
 GOTCHA: the generator clears `data/epicterrain` and `data/minecraft` before it writes, so the `earth_*` tags are written by it too (a first version of them was
-hand-written files, which the next run would have deleted). It also adds to each earth tag the copies of the vanilla biomes it lists (grove's copy `foothills_cold`, stony
-peaks' copies `volcano` and the Epic peaks, ...), because a copy must be in every tag its original is in; `EpicBiomeSourceTest` enforces that and failed on the first version.
+hand-written files, which the next run would have deleted). It also adds to each earth tag the copies of the vanilla biomes it lists (stony
+peaks' copy `volcano`, beach's copy `atoll`, river's copy `crater_lake`), because a copy must be in every tag its original is in; `EarthTagsTest` enforces that (the same rule, tested
+in the days of the Epic biomes, failed on the first version).
 
 ### The Earth world type in the game
 
-Built 2026-10-28 on the user's go-ahead ("Approve, build it"). It is a second world type next to Epic Terrain, which is untouched: **Create New World, World Type,
+Built 2026-10-28 on the user's go-ahead ("Approve, build it"). It was built as a second world type next to Epic Terrain (removed in 1.0.1): **Create New World, World Type,
 "Earth (prototype)"** (the preset `epicterrain:earth`; a dedicated server would use `level-type=epicterrain:earth`, which has not been tried). This section was written before the first play;
 it was then played in the development client and, as version 0.2.0 (without caves), in the real launcher with Distant Horizons, where the author reported it "ran good on 32 chunks, + 128 from
 distant horizons". What it says "tested" was tested headlessly through the game's own loaders and generator (`EarthGameTest`, 20 tests).
@@ -562,7 +411,7 @@ distant horizons". What it says "tested" was tested headlessly through the game'
 | `EarthField` | `worldgen`, density function type `epicterrain:earth_field` | three outputs of that call as density functions: `earth/density` (`63 + ground - y`), `earth/surface` (the ground's y) and `earth/land` (+1 on dry land, for the spawn target). They go in the noise router as `final_density`, `chunk_surface_level` and `continents`; nothing else of the terrain is made of noise |
 | `EarthChunkGenerator`, `EarthFluidPicker` | `worldgen`, `epicterrain:earth_noise` | vanilla's noise generator with one change: where the water is. Vanilla fills everything open below y 63 at one sea level; the picker asks the model, column by column, so a river or a lake or a crater lake stands at its own level above the sea. Vanilla's aquifers are kept, but only below the ground (`NoiseBasedAquiferMixin`, see "The underground"). It also bounds the structure search (`SearchBudget`) |
 | `EarthBiomeSource` | `worldgen`, `epicterrain:earth` | the biome mapping of `BiomeClimate` and `Islands` (vanilla's table, asked about the model's numbers) plus the volcano, atoll and crater lake biomes by name, and below the surface vanilla's cave biomes, asked with a depth (see "The underground") |
-| Datapack | `tools/gen_worldgen.py` | `earth/*` density functions, noise settings `epicterrain:earth` (vanilla's, with that router, the Epic type's 576-block height and surface rules, vanilla's aquifers, spawn target = `earth/land` in 0.5 to 1) and world preset `epicterrain:earth`. The biomes are vanilla's own, carvers and all |
+| Datapack | `tools/gen_worldgen.py` | `earth/*` density functions, noise settings `epicterrain:earth` (vanilla's, with that router, 576 blocks of height, its own surface rules, vanilla's aquifers, spawn target = `earth/land` in 0.5 to 1) and world preset `epicterrain:earth`. The biomes are vanilla's own, carvers and all |
 
 **What you will see.**
 
@@ -657,8 +506,8 @@ and an ocean-monument `/locate structure` still running after four minutes, when
 
 ### Trying it in the real launcher, with shaders and Distant Horizons
 
-`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.0.1.jar` (about 330 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
-client classes and the two mixins (`epicterrain.mixins.json` for both sides, `epicterrain.client.mixins.json` for the client), the generated datapack (`data/`), the language file, the
+`./gradlew assemble` (no tests) writes `build/libs/epicterrain-1.0.1.jar` (about 160 KB; the `-sources.jar` next to it is not needed to play). It holds the classes, the
+mixin (`epicterrain.mixins.json`), the generated datapack (`data/`), the language file, the
 icon and the access widener (namespace `official`, as the unobfuscated 26.3 needs). Versions: 0.2.0 was the first one tried in the launcher (the Earth world type without caves, with Distant
 Horizons, which ran well at 32 chunks plus 128 of Distant Horizons); 0.3.0 added vanilla's underground (see "The underground") and the search limits; 1.0.0 is the same code under a release number, with the license and the mod's contact details in its metadata. The release jar was built from the tree of the last full test run (169 tests, 0 failures, 0 errors, 0 skipped). Version 0.2.0 has been loaded by the real launcher; 1.0.0 as such has not yet.
 
@@ -688,11 +537,9 @@ profile more memory (in the launcher's JVM arguments, `-Xmx6G` or more): Distant
 
 ## Design notes
 
-* Biomes and terrain shape are separate in modern worldgen, so the climate values the biome source reads
-  (continentalness, erosion, weirdness, temperature) are pushed toward mountain values as uplift grows. Vanilla's own
-  foothill meadows, groves and peak biomes then follow the terrain, and everything above the snow line turns to
-  frozen peaks.
-* Vanilla's `offset`, `factor`, `jaggedness`, depth, surface-level and slide functions are copied and rewritten rather
-  than replaced, so caves, aquifers, ore veins, structures and surface rules keep working unchanged.
-* An earlier version cut ranges out of the ridge lines of a noise field. That produced cell-like blobs, and a faint
-  fringe of uplift reached almost everywhere (59% of land at a 50% slider), so it was replaced by `RangeField`.
+* Biomes and terrain shape are separate in modern worldgen. The Earth world keeps vanilla's biome table and asks it about the simulated ground's height, rainfall and distance from the sea, so
+  vanilla's own biomes follow the terrain and every structure and mod that reads biome tags works unchanged.
+* Vanilla's `offset`, `factor`, `jaggedness`, depth, surface-level and slide functions are copied and rewritten rather than replaced, so caves, aquifers, ore veins, structures and surface rules keep
+  working unchanged.
+* The first world type (removed in 1.0.1) cut ranges into vanilla terrain with a custom density function and planned its rivers over the finished ground. The user judged its carved rivers unnatural
+  ("it straight up looked unnatural"), which is why the Earth world's rivers come out of the same simulation as its mountains, and then the mod was cut down to the Earth world.

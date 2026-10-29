@@ -2,6 +2,10 @@
 
 ## 1.0.1
 
+* **Removed: the "Epic Terrain" world type.** The mod now has one world type, **Earth (prototype)**, which is closer to what the mod is for. With it went the Customize slider, the epic range and river
+  biomes (`epicterrain:epic_*`, `foothills_*`) and their `/locate` tags, the epic rivers, and the code behind them. **A world made with 1.0.0's Epic Terrain type will not open with this version**
+  (it names a generator that is gone); keep 1.0.0 for such a world. Earth worlds, the Earth biomes and tags (`#epicterrain:earth_*`) and the Earth options are unchanged. The mod id and the name
+  `Epic Terrain` are kept so that Earth worlds still open.
 * **Earth world: the bands of the rock layers on the plains curve instead of running as long parallel diagonal streaks.** Seen from above, the 1.0.0 plains were combed in straight bands about
   200 blocks apart across the whole continent. The beds now dip a little less (0.25 m a block, from 0.35) and their outcrops bend more (the warp is 2.5 times larger and its waves 12 km across, from
   16 km), so the bands flow in gentle S-curves. How bumpy the ground is does not change (the ripple is 4.6 blocks high, against 4.8), and the coasts, mountain ranges and tallest peaks are the same; lakes

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 
-import com.epicterrain.river.Meander;
-import com.epicterrain.river.TerrainView;
 
 /**
  * The rivers of a simulated continent as lines with a width, ready to be drawn or carved.
@@ -87,23 +85,6 @@ public final class Rivers {
 		return dials.minWidth() * Math.sqrt(Math.max(1.0, drainageBlocks2 / ContinentSimulator.RIVER_BLOCKS2));
 	}
 
-	private record View(DoubleBinaryOperator height) implements TerrainView {
-		@Override
-		public double ground(double x, double z) {
-			return this.height.applyAsDouble(x, z);
-		}
-
-		@Override
-		public double uplift(double x, double z) {
-			return 0.0;
-		}
-
-		@Override
-		public double land(double x, double z) {
-			return 1.0;
-		}
-	}
-
 	/**
 	 * @param ground the height of the smooth ground at a block position (only differences are used, to tell gentle ground from steep and
 	 *               to keep a bend from climbing out of its valley)
@@ -169,7 +150,6 @@ public final class Rivers {
 		}
 		Arrays.sort(order, Comparator.comparingDouble((Integer i) -> -c.area[tails.get(i)]));
 
-		TerrainView view = new View(ground);
 		River[] built = new River[chains.size()];
 		for (int id : order) {
 			int[] cells = chains.get(id);
@@ -211,7 +191,7 @@ public final class Rivers {
 			double routedGridLength = length(routed);
 			DoubleUnaryOperator widthOnRouted = t -> widthAt(t / Math.max(1.0e-9, routedGridLength), along, cellWidth);
 			long seed = c.config.seed() * 0x9E3779B97F4A7C15L + cells[0];
-			List<double[]> line = routed.size() < 12 ? resample(routed, SPACING) : resample(smooth(Meander.apply(routed, widthOnRouted, view, seed)), SPACING);
+			List<double[]> line = routed.size() < 12 ? resample(routed, SPACING) : resample(smooth(Meander.apply(routed, widthOnRouted, ground, seed)), SPACING);
 
 			double[] width = new double[line.size()];
 			double total = length(line);

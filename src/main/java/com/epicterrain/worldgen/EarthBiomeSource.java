@@ -1,9 +1,7 @@
 package com.epicterrain.worldgen;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -15,7 +13,6 @@ import com.epicterrain.earth.EarthConfig;
 import com.epicterrain.earth.EarthWorld;
 import com.epicterrain.earth.EarthWorlds;
 import com.epicterrain.earth.Islands;
-import com.epicterrain.worldgen.EpicBiomeSource.Variant;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -54,8 +51,7 @@ public final class EarthBiomeSource extends BiomeSource {
 			MultiNoiseBiomeSource.CODEC.codec().fieldOf("base").forGetter(s -> s.base),
 			Biome.CODEC.fieldOf("volcano").forGetter(s -> s.volcano),
 			Biome.CODEC.fieldOf("atoll").forGetter(s -> s.atoll),
-			Biome.CODEC.fieldOf("crater_lake").forGetter(s -> s.craterLake),
-			Variant.CODEC.listOf().optionalFieldOf("variants", List.of()).forGetter(s -> s.variantList)
+			Biome.CODEC.fieldOf("crater_lake").forGetter(s -> s.craterLake)
 		).apply(i, EarthBiomeSource::new));
 
 	/** Where in a column the climate sampler is asked (the quart y of block 16): temperature, humidity and weirdness do not change with height. */
@@ -74,20 +70,14 @@ public final class EarthBiomeSource extends BiomeSource {
 	private final Holder<Biome> volcano;
 	private final Holder<Biome> atoll;
 	private final Holder<Biome> craterLake;
-	private final List<Variant> variantList;
-	private final Map<Holder<Biome>, Holder<Biome>> variants = new HashMap<>();
 	private final BiomeClimate.Dials dials = BiomeClimate.Dials.fromProperties();
 	private volatile Set<Holder<Biome>> undergroundBiomes;
 
-	public EarthBiomeSource(MultiNoiseBiomeSource base, Holder<Biome> volcano, Holder<Biome> atoll, Holder<Biome> craterLake, List<Variant> variantList) {
+	public EarthBiomeSource(MultiNoiseBiomeSource base, Holder<Biome> volcano, Holder<Biome> atoll, Holder<Biome> craterLake) {
 		this.base = base;
 		this.volcano = volcano;
 		this.atoll = atoll;
 		this.craterLake = craterLake;
-		this.variantList = List.copyOf(variantList);
-		for (Variant v : this.variantList) {
-			this.variants.put(v.from(), v.to());
-		}
 	}
 
 	@Override
@@ -97,8 +87,8 @@ public final class EarthBiomeSource extends BiomeSource {
 
 	@Override
 	protected Stream<Holder<Biome>> collectPossibleBiomes() {
-		// what the table can answer (each as its replacement where the world preset names one), and the three island biomes
-		return Stream.concat(this.base.possibleBiomes().stream().map(biome -> this.variants.getOrDefault(biome, biome)), Stream.of(this.volcano, this.atoll, this.craterLake)).distinct();
+		// what the table can answer, and the three island biomes
+		return Stream.concat(this.base.possibleBiomes().stream(), Stream.of(this.volcano, this.atoll, this.craterLake)).distinct();
 	}
 
 	/** The world a climate sampler works for: ours is behind its continentalness function. */
@@ -114,7 +104,7 @@ public final class EarthBiomeSource extends BiomeSource {
 			known = this.base.possibleBiomes().stream().filter(b -> b.unwrapKey().map(key -> {
 				String path = key.identifier().getPath();
 				return path.contains("caves") || path.contains("deep_dark");
-			}).orElse(false)).map(b -> this.variants.getOrDefault(b, b)).collect(Collectors.toUnmodifiableSet());
+			}).orElse(false)).collect(Collectors.toUnmodifiableSet());
 			this.undergroundBiomes = known;
 		}
 		return known.contains(biome);
@@ -146,8 +136,7 @@ public final class EarthBiomeSource extends BiomeSource {
 
 		private Holder<Biome> ask(double depth) {
 			Holder<Biome> asked = EarthBiomeSource.this.base.getNoiseBiome(Climate.target(this.climate[0], this.climate[1], this.climate[5], this.climate[3], (float) depth, this.climate[4]));
-			Holder<Biome> replaced = EarthBiomeSource.this.variants.getOrDefault(asked, asked);
-			return EarthBiomeSource.this.isUnderground(replaced) ? replaced : this.surface;
+			return EarthBiomeSource.this.isUnderground(asked) ? asked : this.surface;
 		}
 
 		/** The biome at a block height. */
@@ -315,9 +304,7 @@ public final class EarthBiomeSource extends BiomeSource {
 		double coast = island != null ? world.islandCoast(island, x, z) : world.coastBlocks(x, z);
 		float[] climate = { (float) cell.temperature, (float) cell.humidity, (float) cell.continentalness, (float) cell.erosion, (float) cell.weirdness,
 			(float) BiomeClimate.undergroundContinentalness(seed, x, z, coast) };
-		Holder<Biome> vanilla = this.base.getNoiseBiome(Climate.target(climate[0], climate[1], climate[2], climate[3], 0.0f, climate[4]));
-		Holder<Biome> copy = this.variants.get(vanilla);
-		return new Column(copy != null ? copy : vanilla, surfaceY, climate);
+		return new Column(this.base.getNoiseBiome(Climate.target(climate[0], climate[1], climate[2], climate[3], 0.0f, climate[4])), surfaceY, climate);
 	}
 
 	@Override

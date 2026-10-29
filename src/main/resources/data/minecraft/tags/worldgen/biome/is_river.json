@@ -1,9 +1,5 @@
 {
   "values": [
-    "epicterrain:epic_river",
-    "epicterrain:epic_grand_river",
-    "epicterrain:crater_lake",
-    "epicterrain:epic_frozen_river",
-    "epicterrain:epic_frozen_grand_river"
+    "epicterrain:crater_lake"
   ]
 }
