@@ -44,10 +44,13 @@ public final class WorldgenHarness implements AutoCloseable {
 
 	private final CloseableResourceManager resources;
 	public final RegistryAccess.Frozen registries;
+	/** The data-driven registries together with the built-in ones (block, item, ...), as the running game's registry access has them. */
+	public final RegistryAccess.Frozen allRegistries;
 
-	private WorldgenHarness(CloseableResourceManager resources, RegistryAccess.Frozen registries) {
+	private WorldgenHarness(CloseableResourceManager resources, RegistryAccess.Frozen registries, RegistryAccess.Frozen allRegistries) {
 		this.resources = resources;
 		this.registries = registries;
+		this.allRegistries = allRegistries;
 	}
 
 	/** Loads once per JVM; loading registries is slow and the result is immutable. */
@@ -95,7 +98,14 @@ public final class WorldgenHarness implements AutoCloseable {
 		).join();
 		// Biome/placed-feature tags are bound after the registries load (ReloadableServerResources in the real game).
 		TagLoader.loadTagsForExistingRegistries(resources, loaded).forEach(Registry.PendingTags::apply);
-		return new WorldgenHarness(resources, loaded);
+		// and the tags of the built-in registries (block tags such as features_cannot_replace, which structures look up), as the server's resource reload binds them
+		staticTags.forEach(Registry.PendingTags::apply);
+		return new WorldgenHarness(resources, loaded, layers.replaceFrom(RegistryLayer.WORLD, loaded).compositeAccess());
+	}
+
+	/** The vanilla pack and this mod's data, as the game's resource manager: what the structure template manager reads templates from. */
+	public net.minecraft.server.packs.resources.ResourceManager resourceManager() {
+		return resources;
 	}
 
 	public static ResourceKey<NoiseGeneratorSettings> settingsKey(String id) {
