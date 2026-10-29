@@ -1,6 +1,6 @@
 # Tectonic Terrain: user guide
 
-Tectonic Terrain 1.1.0 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
+Tectonic Terrain 1.1.1 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
 (The mod was called Epic Terrain until it was renamed. Its id and jar name, `epicterrain`, are unchanged.)
 
 An Earth world is a procedural continent. It is simulated from plate tectonics, rock layers, erosion and climate, so mountain belts, rivers that run from the mountains to the sea, lakes, coasts and
@@ -20,7 +20,7 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 |---|---|---|
 | Fabric Loader | 0.20.1 or newer | [Fabric installer](https://fabricmc.net/use/installer/) |
 | Fabric API | 0.165.0+26.3 (the version this mod is built against; newer 26.3 builds should work but were not tried) | [Modrinth: Fabric API](https://modrinth.com/mod/fabric-api) |
-| Tectonic Terrain | 1.1.0 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.1.0.jar`) |
+| Tectonic Terrain | 1.1.1 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.1.1.jar`) |
 
 **Optional, for better graphics and a far view.** These versions were checked against Modrinth's lists for 26.3 on 2026-10-28.
 
@@ -39,7 +39,7 @@ have had little play. Nothing above is a guarantee for your machine; if somethin
 
 1. **Install Fabric** for Minecraft 26.3 with the [Fabric installer](https://fabricmc.net/use/installer/): pick 26.3 and loader 0.20.1 or newer, and let it create a launcher profile.
 2. **Open your mods folder.** Windows: `%APPDATA%\.minecraft\mods` (create it if it is not there). macOS: `~/Library/Application Support/minecraft/mods`. Linux: `~/.minecraft/mods`.
-3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.1.0.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
+3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.1.1.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
 4. **Give the game memory** (recommended with Distant Horizons, and harmless without it). In the launcher, open the Fabric profile, then **More options** (or **Edit**) and in **JVM arguments** change
    `-Xmx2G` to `-Xmx6G` or more if your computer has the memory. The Earth world itself needs little (a full test of its simulation fits in 2 GB), but Distant Horizons keeps a lot.
 5. **Start the game** with the Fabric profile. The log (`.minecraft/logs/latest.log`) should contain the line `Tectonic Terrain loaded`.
@@ -168,6 +168,6 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 
 ## Reporting problems
 
-Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.1.0), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
+Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.1.1), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
 what world type and seed, what you did, and the end of `.minecraft/logs/latest.log` (and the file in `.minecraft/crash-reports` if the game crashed). For terrain you think looks wrong, a screenshot with F3
 open and the coordinates is the most useful thing. How the mod works inside, and what has been measured, is in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.1
 
 * **Renamed (names shown only): the mod is now called Tectonic Terrain, and its world type "Earth"** (it was "Earth (prototype)"). The mod id `epicterrain`, the jar name `epicterrain-*.jar`, the world preset
   `epicterrain:earth`, the biome and tag ids and the startup options are unchanged, so existing Earth worlds open as before. The log line at startup is now `Tectonic Terrain loaded`.
