@@ -81,6 +81,19 @@ public final class Continent {
 		return (int) Math.round(Math.min(500.0, EarthConfig.SEA_LEVEL_Y + blocksAbove(this.height[i])));
 	}
 
+	/**
+	 * The real height in metres of a ground given in blocks (the inverse of {@link #blocksAbove}): on land 10.6 m a block, and under the sea the floor that was eased to
+	 * about 85 blocks stretched back to the depth it stands for (the deepest floor, 85 blocks, is some 3.5 km down). Anything that compares a height with real metres, as
+	 * the biome mapping does for the depth of the sea, needs this and not 10.6 m a block.
+	 */
+	public static double metresOf(double blocks) {
+		if (blocks >= 0.0) {
+			return blocks * EarthConfig.METRES_PER_BLOCK_UP;
+		}
+		double left = 1.0 + blocks / 85.0;
+		return left <= 1.0e-4 ? -8_000.0 : 900.0 * StrictMath.log(left);
+	}
+
 	/** Blocks above sea level for a real height in metres: 1 block per 10.6 m on land, and the sea floor eased to about 85 blocks down. */
 	public static double blocksAbove(double heightMetres) {
 		return heightMetres >= 0.0 ? heightMetres / EarthConfig.METRES_PER_BLOCK_UP : -85.0 * (1.0 - StrictMath.exp(heightMetres / 900.0));

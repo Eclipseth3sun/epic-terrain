@@ -56,14 +56,52 @@ class BiomeGapStatsProbeTest {
 		RandomState state = harness.randomState(seed, settings);
 		BiomeResolver resolver = generator.getBiomeSource().createResolver(state.createClimateSampler(SamplerContext.EMPTY_UNCACHED));
 		Map<String, Integer> counts = new TreeMap<>();
+		Map<String, java.util.List<Integer>> floors = new TreeMap<>();
+		Map<String, java.util.List<Integer>> swampGround = new TreeMap<>();
 		int total = 0;
 		int half = 40_000;
 		for (int x = -half; x < half; x += 200) {
 			for (int z = -half; z < half; z += 200) {
 				int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, WORLD, state);
 				Holder<Biome> biome = resolver.getNoiseBiome(Math.floorDiv(x, 4), Math.floorDiv(Math.max(y - 2, 0), 4), Math.floorDiv(z, 4));
-				counts.merge(biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("?"), 1, Integer::sum);
+				String id = biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
+				counts.merge(id, 1, Integer::sum);
 				total++;
+				if (id.contains("ocean") && (x / 200 + z / 200) % 3 == 0) {
+					net.minecraft.world.level.NoiseColumn column = generator.getBaseColumn(x, z, WORLD, state);
+					int floor = 62;
+					while (floor > -60 && (column.getBlock(floor).isAir() || column.getBlock(floor).is(net.minecraft.world.level.block.Blocks.WATER))) {
+						floor--;
+					}
+					floors.computeIfAbsent(id.startsWith("deep") ? "deep_*" : "ocean_*", k -> new java.util.ArrayList<>()).add(63 - floor);
+				}
+				if (id.equals("swamp") || id.equals("mangrove_swamp")) {
+					net.minecraft.world.level.NoiseColumn column = generator.getBaseColumn(x, z, WORLD, state);
+					int top = 120;
+					while (top > -60 && column.getBlock(top).isAir()) {
+						top--;
+					}
+					int solid = top;
+					while (solid > -60 && (column.getBlock(solid).isAir() || column.getBlock(solid).is(net.minecraft.world.level.block.Blocks.WATER))) {
+						solid--;
+					}
+					swampGround.computeIfAbsent(id, k -> new java.util.ArrayList<>()).add(solid - 62);
+					swampGround.computeIfAbsent(id + " water", k -> new java.util.ArrayList<>()).add(column.getBlock(63).is(net.minecraft.world.level.block.Blocks.WATER) || column.getBlock(62).is(net.minecraft.world.level.block.Blocks.WATER) ? 1 : 0);
+				}
+			}
+		}
+		for (Map.Entry<String, java.util.List<Integer>> e : floors.entrySet()) {
+			java.util.List<Integer> v = e.getValue();
+			java.util.Collections.sort(v);
+			System.out.printf("VANILLA ocean floor depth below sea level, %s: %d samples, 10%% %d, 50%% %d, 90%% %d, max %d blocks%n", e.getKey(), v.size(), v.get(v.size() / 10), v.get(v.size() / 2), v.get(v.size() * 9 / 10), v.get(v.size() - 1));
+		}
+		for (Map.Entry<String, java.util.List<Integer>> e : swampGround.entrySet()) {
+			java.util.List<Integer> v = e.getValue();
+			java.util.Collections.sort(v);
+			if (e.getKey().endsWith("water")) {
+				System.out.printf("VANILLA %s: %d columns, water at the sea level surface in %.0f%%%n", e.getKey(), v.size(), 100.0 * v.stream().mapToInt(Integer::intValue).sum() / v.size());
+			} else {
+				System.out.printf("VANILLA %s ground relative to y 62: %d samples, 10%% %d, 50%% %d, 90%% %d blocks%n", e.getKey(), v.size(), v.get(v.size() / 10), v.get(v.size() / 2), v.get(v.size() * 9 / 10));
 			}
 		}
 		System.out.printf("VANILLA surface biome shares, 80 km square, seed %d, %d samples (share of everything, then of land = not ocean/beach/river):%n", seed, total);
@@ -154,6 +192,53 @@ class BiomeGapStatsProbeTest {
 				}
 			}
 		}
+		// the biomes themselves: shares of the window's land, and the ground of the swamps against vanilla's
+		BiomeResolver resolver = generator.getBiomeSource().createResolver(state.createClimateSampler(SamplerContext.EMPTY_UNCACHED));
+		Map<String, Integer> biomeCounts = new TreeMap<>();
+		java.util.List<Integer> marshGround = new java.util.ArrayList<>();
+		int marshFlooded = 0;
+		long cells = 0;
+		long landCells = 0;
+		long deep = 0, seaCells = 0;
+		for (int x = (int) w[0]; x < w[1]; x += 64) {
+			for (int z = (int) w[2]; z < w[3]; z += 64) {
+				world.sampleBlock(x, z, out);
+				int y = (int) Math.ceil(63 + Math.max(out[0], -30.0)) + 4;
+				String id = resolver.getNoiseBiome(Math.floorDiv(x, 4), Math.floorDiv(y, 4), Math.floorDiv(z, 4)).unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
+				biomeCounts.merge(id, 1, Integer::sum);
+				cells++;
+				boolean isOcean = id.contains("ocean");
+				if (isOcean) {
+					seaCells++;
+					if (id.startsWith("deep")) {
+						deep++;
+					}
+				} else if (!id.contains("river")) {
+					landCells++;
+				}
+				if (id.equals("swamp") || id.equals("mangrove_swamp")) {
+					marshGround.add((int) Math.ceil(out[0]));
+					if (Math.ceil(out[0]) <= -1.0) {
+						marshFlooded++;
+					}
+				}
+			}
+		}
+		System.out.printf("  MARSH: swamp %.2f%% and mangrove swamp %.2f%% of land (vanilla 1.4%% and 0.8%%)%n", 100.0 * biomeCounts.getOrDefault("swamp", 0) / landCells, 100.0 * biomeCounts.getOrDefault("mangrove_swamp", 0) / landCells);
+		if (!marshGround.isEmpty()) {
+			java.util.Collections.sort(marshGround);
+			int n = marshGround.size();
+			System.out.printf("  MARSH ground (blocks above the sea, rounded up; vanilla's swamps are 10%% -3, 50%% 0, 90%% +6 about y 62): %d samples, 10%% %d, 50%% %d, 90%% %d, flooded %.0f%% (vanilla 33-36%%)%n", n,
+				marshGround.get(n / 10), marshGround.get(n / 2), marshGround.get(n * 9 / 10), 100.0 * marshFlooded / n);
+		}
+		String[] watch = { "windswept_hills", "windswept_gravelly_hills", "windswept_forest", "windswept_savanna", "stony_shore", "stony_peaks", "beach", "deep_ocean", "deep_cold_ocean", "deep_lukewarm_ocean", "deep_frozen_ocean", "ocean", "cold_ocean", "lukewarm_ocean", "frozen_ocean", "warm_ocean" };
+		StringBuilder shares = new StringBuilder();
+		for (String b : watch) {
+			boolean isSea = b.contains("ocean");
+			shares.append(String.format(" %s %.2f%%", b, 100.0 * biomeCounts.getOrDefault(b, 0) / (isSea ? seaCells : landCells)));
+		}
+		System.out.println("  SHARES (of land, or of sea for oceans):" + shares);
+		System.out.printf("  deep ocean is %.0f%% of the window's sea (vanilla about 29%%)%n", 100.0 * deep / Math.max(1, seaCells));
 		java.util.Arrays.sort(rainSample, 0, rains);
 		System.out.printf("EARTH seed %d: land %d cells, sea %d cells (64-block cells over the window)%n", seed, land, sea);
 		System.out.printf("  relief bands, share of land: lowland %.1f%%, foothills %.1f%%, montane %.1f%%, subalpine %.1f%%, peaks %.1f%%%n", 100.0 * lowland / land, 100.0 * foothills / land,

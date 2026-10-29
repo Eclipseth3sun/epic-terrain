@@ -293,7 +293,7 @@ class EarthIslandsTest {
 				Islands.climate(1.0, 40.0, t0, 0.0, w0, 100.0, 100.0, 77L, BiomeClimate.Dials.defaults(), cell);
 				String shore = source.getNoiseBiome(Climate.target((float) cell.temperature, (float) cell.humidity, (float) cell.continentalness, (float) cell.erosion, 0.0f, (float) cell.weirdness))
 					.unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
-				assertTrue(shore.contains("beach"), "a low shore is a beach, not " + shore + " (weirdness " + w0 + ", temperature " + t0 + "): t " + cell.temperature + " h " + cell.humidity + " c " + cell.continentalness + " e " + cell.erosion + " w " + cell.weirdness);
+				assertTrue(shore.contains("beach") || shore.equals("stony_shore"), "a low shore is a beach (or, on a rocky stretch, a stony shore), not " + shore + " (weirdness " + w0 + ", temperature " + t0 + "): t " + cell.temperature + " h " + cell.humidity + " c " + cell.continentalness + " e " + cell.erosion + " w " + cell.weirdness);
 			}
 		}
 		// a tall volcano is colder on top: the temperature falls with height

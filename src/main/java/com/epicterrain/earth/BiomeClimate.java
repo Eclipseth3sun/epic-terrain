@@ -67,6 +67,20 @@ public final class BiomeClimate {
 	public static final byte PEAKS = 5;
 	public static final String[] ZONE_NAMES = { "ocean", "lowland", "foothills", "montane", "subalpine", "peaks" };
 
+	/**
+	 * The real depth, in metres, from which the sea floor is asked for as deep ocean (vanilla's table wants a continentalness under -0.455). About 62 blocks down: vanilla's
+	 * own deep oceans are 18 to 29 blocks deep (66 at most) and its oceans 9 to 18, so this is a deep ocean by any measure of vanilla's, and the sea here (60 to 100 blocks
+	 * down in the open) is deeper still; the shallower part keeps vanilla's plain ocean, with its kelp and warm-water reefs, about as often as vanilla does. (An earlier 1,500 m was never met in the game: it was compared with the depth in blocks times 10.6 m, and the floor is eased to 85 blocks.)
+	 */
+	public static final double DEEP_OCEAN_M = 1200.0;
+	/**
+	 * Thresholds of the patches that reach the rows of vanilla's table the bands alone never ask for (each is a noise, scaled by the variety dial, so that clean zones
+	 * stay clean): where the hill country is windswept, which stretches of coast are rock and not sand, and which summits are bare warm rock (stony peaks).
+	 */
+	private static final double SHATTER_THRESHOLD = 0.50;
+	private static final double ROCKY_COAST_THRESHOLD = 0.08;
+	private static final double BARE_SUMMIT_THRESHOLD = 0.15;
+
 	/** Real relief above the surrounding base level, in metres, where each band begins. */
 	public static final double FOOTHILLS_M = 300.0;
 	public static final double MONTANE_M = 900.0;
@@ -126,7 +140,7 @@ public final class BiomeClimate {
 			double depth = -heightM;
 			out.zone = OCEAN;
 			out.temperature = Noise.clamp(t0, -1.0, 1.0);
-			out.continentalness = depth >= 1500.0 ? -0.7 : depth >= 300.0 ? -0.35 : -0.25;
+			out.continentalness = depth >= DEEP_OCEAN_M ? -0.7 : depth >= 300.0 ? -0.35 : -0.25;
 			out.erosion = 0.25;
 			out.weirdness = 0.35 * sign;
 			return;
@@ -137,6 +151,9 @@ public final class BiomeClimate {
 		double wander = Noise.clamp(d.variety() * 2.0 * Noise.fbm(seed + 203, wx / 1800.0, wz / 1800.0, 2), -1.0, 1.0);
 		double swing = Noise.clamp(d.variety() * 2.0 * Noise.fbm(seed + 205, wx / 1500.0, wz / 1500.0, 2), -1.0, 1.0);
 		double mild = Noise.clamp(d.variety() * 2.0 * Noise.fbm(seed + 207, wx / 2200.0, wz / 2200.0, 2), -1.0, 1.0);
+		double shatter = d.variety() * 2.0 * Noise.fbm(seed + 211, wx / 5200.0, wz / 5200.0, 2);
+		double rocky = d.variety() * 2.0 * Noise.fbm(seed + 213, wx / 1800.0, wz / 1800.0, 2);
+		double bare = d.variety() * 2.0 * Noise.fbm(seed + 215, wx / 6500.0, wz / 6500.0, 2);
 		out.temperature = Noise.clamp(t0 - d.lapse() * heightM / 1000.0 + 0.10 * mild, -1.0, 1.0);
 		double edge = reliefM * (1.0 + 0.9 * Noise.clamp(d.variety() * 2.0 * Noise.fbm(seed + 201, wx / 2800.0, wz / 2800.0, 2), -1.0, 1.0));
 		byte zone;
@@ -163,13 +180,30 @@ public final class BiomeClimate {
 			erosion = -0.90 + 0.06 * wander;
 			magnitude = 0.67 + 0.05 * swing;
 		}
+		// the shattered band of vanilla's table is where its windswept hills, forests, gravelly hills and savannas are: patches of the hill country take it
+		if ((zone == FOOTHILLS || zone == MONTANE) && shatter > SHATTER_THRESHOLD) {
+			erosion = 0.50 + 0.03 * wander;
+		}
+		// vanilla's stony peaks are the peaks of a warm climate (a temperature of 0.2 to 0.55), which the lapse rate never leaves a summit: patches of the peaks are bare warm rock
+		if (zone == PEAKS && bare > BARE_SUMMIT_THRESHOLD) {
+			out.temperature = 0.32 + 0.12 * mild;
+		}
+		// and the same on the near-coast lowland, where the shattered band is vanilla's windswept savanna
+		if (zone == LOWLAND && coastBlocks > 96.0 && coastBlocks <= 700.0 && shatter > SHATTER_THRESHOLD) {
+			erosion = 0.50 + 0.03 * wander;
+		}
 		out.zone = zone;
 		out.erosion = erosion;
 		out.weirdness = sign * magnitude;
 		// vanilla's table only gives a beach where weirdness is small but not a valley's (between about 0.05 and 0.27, either sign), and the
 		// lowland's usual 0.4 is outside that, so a coast of lowland asks for 0.2
-		if (coastBlocks <= 96.0 && zone == LOWLAND) {
+		boolean shore = coastBlocks <= 96.0;
+		if (shore) {
 			out.weirdness = sign * 0.20;
+			// a coast of rock and not sand (vanilla's stony shore) has the erosion of hills; a coast of high ground is rock whatever
+			if (zone == LOWLAND && rocky > ROCKY_COAST_THRESHOLD) {
+				out.erosion = -0.30;
+			}
 		}
 		// how far inland: a thin coast, then near, mid and far inland; mountains are always far inland, where the mountain biomes are
 		double cont;
@@ -182,7 +216,7 @@ public final class BiomeClimate {
 		} else {
 			cont = 0.5;
 		}
-		out.continentalness = zone == LOWLAND ? cont : Math.max(cont, 0.45);
+		out.continentalness = zone == LOWLAND || shore ? cont : Math.max(cont, 0.45);
 		if (river && zone <= FOOTHILLS) {
 			out.erosion = -0.1; // the valley setting: vanilla answers river or frozen river
 			out.weirdness = 0.0;

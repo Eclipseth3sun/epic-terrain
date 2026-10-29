@@ -9,10 +9,12 @@ import java.util.stream.Stream;
 
 import com.epicterrain.EpicTerrain;
 import com.epicterrain.earth.BiomeClimate;
+import com.epicterrain.earth.Continent;
 import com.epicterrain.earth.EarthConfig;
 import com.epicterrain.earth.EarthWorld;
 import com.epicterrain.earth.EarthWorlds;
 import com.epicterrain.earth.Islands;
+import com.epicterrain.earth.Wetlands;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -295,8 +297,17 @@ public final class EarthBiomeSource extends BiomeSource {
 		if (island != null) {
 			Islands.climate(ground, world.islandCoast(island, x, z), t0, h0, w0, x, z, seed, this.dials, cell);
 		} else {
-			BiomeClimate.cell(ground * EarthConfig.METRES_PER_BLOCK_UP, world.reliefMetres(x, z), world.rainMm(x, z), world.coastBlocks(x, z), kind == EarthWorld.RIVER, t0, h0, w0, x, z, seed,
+			// a marsh is called a swamp whatever its ground does between the pools and the hummocks: land of the flattest erosion, which vanilla's table answers swamp
+			// or, in the warm, mangrove swamp (the same field makes the ground marshy, see Wetlands)
+			boolean marsh = kind == EarthWorld.NO_WATER && ground > -8.0 && ground < 12.0 && Wetlands.isMarsh(world.wetland(x, z));
+			double heightM = marsh ? Math.max(Continent.metresOf(ground), 60.0) : Continent.metresOf(ground);
+			BiomeClimate.cell(heightM, marsh ? 0.0 : world.reliefMetres(x, z), world.rainMm(x, z), world.coastBlocks(x, z), kind == EarthWorld.RIVER, t0, h0, w0, x, z, seed,
 				this.dials, cell);
+			if (marsh) {
+				cell.erosion = 0.72;
+				cell.weirdness = (w0 < 0.0 ? -1.0 : 1.0) * 0.30;
+				cell.continentalness = Math.max(cell.continentalness, -0.05);
+			}
 		}
 		if (ground > -12.0 && world.mushroom(x, z)) {
 			Islands.mushroomClimate(cell);

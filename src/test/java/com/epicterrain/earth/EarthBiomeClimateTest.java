@@ -181,4 +181,83 @@ class EarthBiomeClimateTest {
 		String slope = biome(source, cell(2600.0, 2200.0, 0.4, -0.4, 0.4, CLEAN));
 		assertTrue(slope.equals("snowy_slopes") || slope.equals("grove"), "a subalpine slope: " + slope);
 	}
+
+	/** Every biome the bands alone once never asked vanilla's table for, with a place the model can ask for it. */
+	@Test
+	void theRowsOfTheTableTheBandsOnceMissedCanBeAsked() {
+		MultiNoiseBiomeSource source = vanilla();
+		Set<String> hills = new java.util.TreeSet<>();
+		Set<String> nearCoast = new java.util.TreeSet<>();
+		Set<String> shore = new java.util.TreeSet<>();
+		Set<String> summits = new java.util.TreeSet<>();
+		Dials dials = Dials.defaults();
+		int hillCells = 0;
+		int windswept = 0;
+		int summitCells = 0;
+		int stony = 0;
+		for (int i = 0; i < 3000; i++) {
+			double wx = 4_321.0 * i + 17.0 * (i % 7);
+			double wz = -2_987.0 * (i % 531) + 1_013.0 * i;
+			for (double t0 : new double[] { -0.7, -0.3, 0.0, 0.4, 0.7 }) {
+				for (double h0 : new double[] { -0.5, 0.0, 0.4 }) {
+					Cell hill = new Cell();
+					BiomeClimate.cell(700.0, 500.0, 1000.0, 5000.0, false, t0, h0, 0.4, wx, wz, 77L, dials, hill);
+					String hillBiome = biome(source, hill);
+					hills.add(hillBiome);
+					Cell near = new Cell();
+					BiomeClimate.cell(60.0, 20.0, 1000.0, 150.0, false, t0, h0, 0.4, wx, wz, 77L, dials, near);
+					nearCoast.add(biome(source, near));
+					Cell coast = new Cell();
+					BiomeClimate.cell(30.0, 10.0, 1000.0, 40.0, false, t0, h0, 0.4, wx, wz, 77L, dials, coast);
+					shore.add(biome(source, coast));
+					Cell peak = new Cell();
+					BiomeClimate.cell(4000.0, 3500.0, 1000.0, 9000.0, false, t0, h0, 0.6, wx, wz, 77L, dials, peak);
+					String peakBiome = biome(source, peak);
+					summits.add(peakBiome);
+					if (t0 == 0.0 && h0 == 0.0) {
+						hillCells++;
+						windswept += hillBiome.startsWith("windswept") ? 1 : 0;
+						summitCells++;
+						stony += peakBiome.equals("stony_peaks") ? 1 : 0;
+					}
+				}
+			}
+		}
+		assertTrue(hills.containsAll(Set.of("windswept_hills", "windswept_forest", "windswept_gravelly_hills")), "the hill country has windswept patches: " + hills);
+		assertTrue(nearCoast.contains("windswept_savanna"), "the near-coast lowland has a windswept savanna: " + nearCoast);
+		assertTrue(shore.contains("stony_shore") && shore.contains("beach"), "a coast is sand in places and rock in others: " + shore);
+		assertTrue(summits.contains("stony_peaks") && (summits.contains("jagged_peaks") || summits.contains("frozen_peaks")), "the summits are bare rock in places and snow in others: " + summits);
+		assertTrue(windswept > hillCells / 40 && windswept < hillCells / 3, "windswept is a patch of the hill country, not all of it: " + windswept + " of " + hillCells);
+		assertTrue(stony > summitCells / 8 && stony < summitCells * 2 / 3, "stony peaks are a share of the summits: " + stony + " of " + summitCells);
+		// and with the variety dial at 0 there are none of these patches: the bands are clean
+		Dials clean = new Dials(0.3, 0.0, 0.0);
+		for (int i = 0; i < 400; i++) {
+			Cell hill = new Cell();
+			BiomeClimate.cell(700.0, 500.0, 1000.0, 5000.0, false, 0.0, 0.0, 0.4, 311.0 * i, -197.0 * i, 77L, clean, hill);
+			assertEquals(-0.30, hill.erosion, 1.0e-9, "no patches with no variety");
+		}
+	}
+
+	@Test
+	void theSeaIsDeepOceanFromTheDepthOfARealDeepSea() {
+		MultiNoiseBiomeSource source = vanilla();
+		// the sea floor is stored eased to 85 blocks (see Continent.blocksAbove), and the biome mapping works in real metres: the two are one scale
+		for (double blocks : new double[] { -5.0, -24.0, -41.0, -62.0, -75.0, -83.0 }) {
+			assertEquals(blocks, Continent.blocksAbove(Continent.metresOf(blocks)), 1.0e-6, "metresOf undoes blocksAbove at " + blocks);
+		}
+		assertEquals(30.0, Continent.metresOf(3.0) / 1.06, 1.0e-6, "on land a block is 10.6 m");
+		Cell shallow = cell(Continent.metresOf(-15.0), 0.0, 0.0, 0.0, 0.3, CLEAN);
+		Cell shelfBreak = cell(Continent.metresOf(-40.0), 0.0, 0.0, 0.0, 0.3, CLEAN);
+		Cell deep = cell(Continent.metresOf(-70.0), 0.0, 0.0, 0.0, 0.3, CLEAN);
+		Cell abyss = cell(Continent.metresOf(-83.0), 0.0, 0.0, 0.0, 0.3, CLEAN);
+		assertEquals("ocean", biome(source, shallow));
+		assertEquals("ocean", biome(source, shelfBreak));
+		assertEquals("deep_ocean", biome(source, deep), "70 blocks down is a deep ocean");
+		assertEquals("deep_ocean", biome(source, abyss), "and the deepest floor of the world too (it was never asked for as one while the two scales were mixed)");
+		// by temperature: cold, lukewarm and frozen deep oceans
+		for (double[] t : new double[][] { { -0.6, 0 }, { -0.3, 0 }, { 0.4, 0 } }) {
+			assertTrue(biome(source, cell(Continent.metresOf(-80.0), 0.0, t[0], 0.0, 0.3, CLEAN)).startsWith("deep_"), "deep at temperature " + t[0]);
+		}
+	}
+
 }

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+* **Flooded swamps and marshes.** Low, flat land near the sea and the rivers is now marsh: its ground stands at the sea level with pools and hummocks of some 40 blocks, about a third of it water (what
+  vanilla's swamps measure), and its biome is swamp, or mangrove swamp in the warm. The ground and the biome come from one field, so a swamp is where the ground is marsh. Swamps and mangrove swamps are
+  about 1 to 4% of the land of a world, as in vanilla (vanilla's are 1.4% and 0.8%). New option `-Depicterrain.earth.wetland=` (1 by default; 0 turns marsh off, 2 makes more).
+* **The 12 overworld biomes the Earth world never produced now occur:** swamp and mangrove swamp (above), the four windswept biomes (patches of the hill country, and of the near-coast lowland), stony shore (stretches of
+  coast), stony peaks (bare, warm summits among the snowy ones) and the four deep oceans. With them come the ocean monument (in the deep ocean beyond the continent, some 15 km out), swamp huts, swamp ruined portals and
+  the swamp and windswept-forest abandoned camps, so every structure vanilla's overworld has now generates (checked on three seeds, `VanillaCoverageProbeTest`), and every placed feature of every overworld biome
+  belongs to a biome that occurs.
+* **Deep ocean was never asked for, which was a bug:** the biome mapping compared the sea floor, stored eased to 85 blocks, with real depths at 10.6 m a block, so the 1,500 m it wanted could not be reached. The sea
+  is now deep ocean from 62 blocks down (about 40% of the sea of the continent's window, and all of the open ocean; vanilla's own deep oceans are 18 to 29 blocks deep).
+* The new patches are noise-driven and scale with the `variety` dial (0 leaves the bands clean).
+* **Existing Earth worlds will show seams** where new chunks meet old ones: biomes change in many places, and the ground changes by a few blocks in marsh country. A new world is not affected.
+
 ## 1.1.1
 
 * **Renamed (names shown only): the mod is now called Tectonic Terrain, and its world type "Earth"** (it was "Earth (prototype)"). The mod id `epicterrain`, the jar name `epicterrain-*.jar`, the world preset

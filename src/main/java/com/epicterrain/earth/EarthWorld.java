@@ -135,6 +135,12 @@ public final class EarthWorld {
 			ground = out[0];
 			water = out[1];
 			kind = (int) out[2];
+			if (kind == NO_WATER && Double.isNaN(water)) {
+				double marsh = this.wetlandWeight(mx, mz);
+				if (marsh > 0.0) {
+					ground += (Wetlands.ground(this.config.seed(), mx, mz) - ground) * Wetlands.blend(marsh);
+				}
+			}
 		} else {
 			ground = this.beyond(mx, mz);
 		}
@@ -206,6 +212,20 @@ public final class EarthWorld {
 			}
 		}
 		return sum;
+	}
+
+	private double wetlandWeight(double mx, double mz) {
+		return Wetlands.weight(this.config.seed(), mx, mz, this.detail.smoothBlocks(mx, mz), this.grid(this.coast, mx, mz), this.grid(this.continent.rain, mx, mz));
+	}
+
+	/** How marshy a column is, 0 to 1 (see {@link Wetlands}); 0 beyond the window. */
+	public double wetland(double wx, double wz) {
+		double mx = this.modelX(wx);
+		double mz = this.modelZ(wz);
+		if (mx < this.minX || mx > this.maxX || mz < this.minZ || mz > this.maxZ) {
+			return 0.0;
+		}
+		return this.wetlandWeight(mx, mz);
 	}
 
 	/** Metres the ground stands above the lowland around it (0 beyond the window). */

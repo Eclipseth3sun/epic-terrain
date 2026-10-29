@@ -22,6 +22,7 @@ import com.epicterrain.earth.EarthConfig;
 import com.epicterrain.earth.EarthWorld;
 import com.epicterrain.earth.EarthWorlds;
 import com.epicterrain.earth.Islands;
+import com.epicterrain.earth.Wetlands;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -345,6 +346,68 @@ class EarthGameTest {
 		BiomeManager biomes = new BiomeManager(generator.getBiomeSource().createResolver(sampler), 0L);
 		generator.buildTerrain(chunk, Blender.empty(), state, structures, biomes, null, Set.of()).join();
 		return chunk;
+	}
+
+	@Test
+	void marshesAreSwampsWhoseGroundIsHalfFloodedLikeVanillas() {
+		double[] window = world.window();
+		int[] best = null;
+		double bestWeight = 0.0;
+		for (int x = (int) window[0]; x < window[1]; x += 48) {
+			for (int z = (int) window[2]; z < window[3]; z += 48) {
+				double weight = world.wetland(x, z);
+				if (weight > bestWeight) {
+					bestWeight = weight;
+					best = new int[] { x, z };
+				}
+			}
+		}
+		assertNotNull(best, "the test window has marsh somewhere");
+		assertTrue(Wetlands.isMarsh(bestWeight), "and some of it is marsh through and through: best weight " + bestWeight);
+		// the pools and hummocks are some 40 blocks across, so a chunk can be all pool: count over a kilometre round the middle of the marsh (by the model, stride 8), and
+		// build four chunks of it to see that the real ground floods where the model says
+		BiomeResolver resolver = generator.getBiomeSource().createResolver(state.createClimateSampler(SamplerContext.EMPTY_UNCACHED));
+		int swamp = 0;
+		int flooded = 0;
+		int columns = 0;
+		double[] out = new double[3];
+		for (int x = best[0] - 640; x < best[0] + 640; x += 8) {
+			for (int z = best[1] - 640; z < best[1] + 640; z += 8) {
+				if (world.wetland(x, z) < 0.6) {
+					continue; // only the marsh through and through: its edge is a slope to the dry land
+				}
+				columns++;
+				world.sampleBlock(x, z, out);
+				swamp += biomeAt(resolver, x, z).getRegisteredName().endsWith("swamp") ? 1 : 0;
+				flooded += Math.ceil(out[0]) <= -1.0 ? 1 : 0;
+			}
+		}
+		System.out.printf("marsh at (%d,%d), weight %.2f: of %d columns of marsh, %d are swamp or mangrove swamp and %d are water (vanilla's swamps: a third)%n", best[0], best[1], bestWeight, columns, swamp, flooded);
+		assertTrue(columns > 2000, "a kilometre of marsh: " + columns);
+		assertTrue(swamp * 100 >= columns * 97, "all of it is swamp: " + swamp + " of " + columns);
+		assertTrue(flooded * 100 >= columns * 25 && flooded * 100 <= columns * 55, "and about a third to a half is water: " + flooded + " of " + columns);
+		int agree = 0;
+		int checked = 0;
+		for (int[] offset : new int[][] { { -300, -300 }, { 300, -300 }, { -300, 300 }, { 300, 300 } }) {
+			int chunkX = (best[0] + offset[0]) >> 4;
+			int chunkZ = (best[1] + offset[1]) >> 4;
+			ProtoChunk chunk = build(chunkX, chunkZ);
+			for (int dx = 0; dx < 16; dx++) {
+				for (int dz = 0; dz < 16; dz++) {
+					int x = chunkX * 16 + dx;
+					int z = chunkZ * 16 + dz;
+					world.sampleBlock(x, z, out);
+					int top = 511;
+					while (top > -64 && chunk.getBlockState(new BlockPos(x, top, z)).isAir()) {
+						top--;
+					}
+					boolean water = chunk.getBlockState(new BlockPos(x, top, z)).is(Blocks.WATER);
+					checked++;
+					agree += water == (Math.ceil(out[0]) <= -1.0) ? 1 : 0;
+				}
+			}
+		}
+		assertTrue(agree * 100 >= checked * 90, "the real chunks flood where the model says: " + agree + " of " + checked + " columns agree");
 	}
 
 	@Test
