@@ -41,7 +41,9 @@ class TerrainVarietyProbeTest {
 		if (seeds == null) {
 			return;
 		}
-		vanilla(Long.parseLong(seeds.split(",")[0].trim()));
+		if (System.getProperty("epicterrain.varietySkipVanilla") == null) {
+			vanilla(Long.parseLong(seeds.split(",")[0].trim()));
+		}
 		for (String s : seeds.split(",")) {
 			earth(Long.parseLong(s.trim()));
 			EarthWorlds.clear();

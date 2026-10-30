@@ -301,8 +301,8 @@ public final class EarthBiomeSource extends BiomeSource {
 			// or, in the warm, mangrove swamp (the same field makes the ground marshy, see Wetlands)
 			boolean marsh = kind == EarthWorld.NO_WATER && ground > -8.0 && ground < 12.0 && Wetlands.isMarsh(world.wetland(x, z));
 			double heightM = marsh ? Math.max(Continent.metresOf(ground), 60.0) : Continent.metresOf(ground);
-			BiomeClimate.cell(heightM, marsh ? 0.0 : world.reliefMetres(x, z), world.rainMm(x, z), world.coastBlocks(x, z), kind == EarthWorld.RIVER, t0, h0, w0, x, z, seed,
-				this.dials, cell);
+			BiomeClimate.cell(heightM, marsh ? 0.0 : world.reliefMetres(x, z), BiomeClimate.climateRain(world.rainMm(x, z)), world.coastBlocks(x, z), kind == EarthWorld.RIVER, t0, h0, w0, x, z, seed,
+				marsh ? 0.0 : world.hilliness(x, z), this.dials, cell);
 			if (marsh) {
 				cell.erosion = 0.72;
 				cell.weirdness = (w0 < 0.0 ? -1.0 : 1.0) * 0.30;

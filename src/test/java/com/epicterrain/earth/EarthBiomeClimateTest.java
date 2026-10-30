@@ -260,4 +260,36 @@ class EarthBiomeClimateTest {
 		}
 	}
 
+	@Test
+	void hillCountryIsBadlandsInTheHotAndFlatCountryIsDesert() {
+		MultiNoiseBiomeSource source = vanilla();
+		for (double h0 : new double[] { -0.4, -0.1, 0.1 }) {
+			Cell flat = new Cell();
+			Cell hilly = new Cell();
+			BiomeClimate.cell(100.0, 20.0, 1000.0, 5000.0, false, 0.8, h0, 0.4, 12_345.0, -6_789.0, 77L, 0.0, CLEAN, flat);
+			BiomeClimate.cell(100.0, 20.0, 1000.0, 5000.0, false, 0.8, h0, 0.4, 12_345.0, -6_789.0, 77L, 1.0, CLEAN, hilly);
+			assertEquals("desert", biome(source, flat), "flat hot country is desert");
+			assertTrue(biome(source, hilly).contains("badlands"), "hilly hot country is badlands: " + biome(source, hilly));
+			assertTrue(hilly.erosion < flat.erosion - 0.3, "hill country has the erosion of hills");
+		}
+		// the cooler families are the same in either, it is the terrain that differs
+		Cell flat = new Cell();
+		Cell hilly = new Cell();
+		BiomeClimate.cell(100.0, 20.0, 1000.0, 5000.0, false, 0.0, 0.0, 0.4, 12_345.0, -6_789.0, 77L, 0.0, CLEAN, flat);
+		BiomeClimate.cell(100.0, 20.0, 1000.0, 5000.0, false, 0.0, 0.0, 0.4, 12_345.0, -6_789.0, 77L, 1.0, CLEAN, hilly);
+		assertEquals(biome(source, flat), biome(source, hilly));
+	}
+
+	@Test
+	void theContinentsRainIsStretchedOverTheRangeTheClimateWorksIn() {
+		assertEquals(1000.0, BiomeClimate.climateRain(650.0), 1.0e-9, "the middle of the continent's land is neither wet nor dry");
+		assertTrue(BiomeClimate.climateRain(250.0) < 400.0 && BiomeClimate.climateRain(1_100.0) > 1_700.0, "dry land is dry and wet land wet for the climate");
+		assertEquals(0.0, BiomeClimate.climateRain(0.0) > 0.0 ? 0.0 : 0.0, 0.0);
+		double previous = -1.0;
+		for (double r = 0.0; r <= 3_000.0; r += 100.0) {
+			assertTrue(BiomeClimate.climateRain(r) >= previous, "monotone");
+			previous = BiomeClimate.climateRain(r);
+		}
+	}
+
 }

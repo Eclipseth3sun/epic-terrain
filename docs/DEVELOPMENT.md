@@ -26,6 +26,7 @@ it, and the few constants it has sit in the `TUNE` block at the top. Vanilla fun
 | `Landscape`, `Strata`, `Detail`, `Noise` | `earth/` | what is added to the simulated skeleton: rock layers, walking-scale relief, shared noise |
 | `Rivers`, `Meander`, `RiverValley` | `earth/` | rivers from the simulation's own drainage, their bends, and the valley each cuts into the ground |
 | `Wetlands` | `earth/` | the marsh: how marshy a column is (low ground, inland, rainy, a wide wetness noise) and the ground of a marsh (pools and hummocks at the sea level); the ground and the biome both read it |
+| `Hills` | `earth/` | the lowland's rolling hills, mesas and dunes by region (laid in `Detail.blocks`), and the character of a region, which the biome mapping reads too |
 | `Islands`, `BiomeClimate`, `EarthMetrics`, `EarthConfig` | `earth/` | islands in the open ocean, the biome mapping, measurements for the tests, and the `-Depicterrain.earth.*` options |
 | `EarthWorld`, `EarthWorlds` | `earth/` | the simulated window behind one call, `sample(x, z)`; one per world seed, kept until the server stops |
 | `EarthField` | `worldgen/` | the density function that turns that call into ground (`earth/density`, `earth/surface`, `earth/land`) |
@@ -581,6 +582,30 @@ differently"). So the fixes change how the model feeds vanilla's table, and the 
   water, and real chunks flood where the model says). `BiomeGapPreviewTest` draws the biomes of a whole world and a close-up of its best marsh (`-Depicterrain.gapPreview=SEED`).
 * **Not done:** the windswept savanna is rare (0.01 to 0.13% of land; vanilla 0.35%); the offline preview maps (`BiomeClimate.compute`) do not draw marsh; a marsh's edge follows a ground contour with a wobble; mangrove swamps have the
   swamp's pools, with no tidal flats of their own; the new ground changes existing worlds by a few blocks in marsh country (seams).
+
+### Hills in the lowland, and biomes that follow them (2026-10-30)
+
+The user's words: "I want to better match the geographic area to the biomes. I'll go through many different biomes while it remains flat for many miles ... different biomes should have slightly more variation
+in geographic features", and, to the plan below, "Prototype it" (flat in the dry and swampy, rolling in the middle, hilly in places; hot hilly regions badlands and mesas; biomes following the simulated rain; a `hills`
+dial; about two thirds of vanilla's roughness).
+
+* **Measured first** (`TerrainVarietyProbeTest`, `TableGridProbeTest`; vanilla seed 4242, Earth seeds 4242 and 6258605606326987467): how far one walks before the ground is 20 blocks from where one started: vanilla median 128 m, 90th
+  percentile 770 m; an Earth world median 1.15 km, 90th 4.7 to 5.2 km. The height range within 512 blocks, medians: vanilla plains 46, forest 49, taiga 48, jungle 46, savanna 47, desert 31, swamp 31, meadow 65, badlands 63;
+  Earth plains 8 to 12, forest 11 to 15, taiga 12, jungle 8 to 20, savanna 6 to 19, desert 13 to 20. In vanilla the families barely differ in roughness either (rolling everywhere, flat only in desert and swamp); its table
+  gives the same families at the erosion of plains and of hills except in the hot (desert at erosion 0.25, badlands at -0.1 and under). So the cause is the simulation's: broad plains, relief only where ranges stand.
+* **`Hills`, laid on the ground in `Detail.blocks`** (not in `smoothBlocks`, so the river network, the marsh and the shore are exactly as they were): a grid, one value a cell, of hills in blocks, bicubic between cells, times a
+  fade of 1 to 0 over 6 cells from any river or lake. Its parts: the *character* of a region (a noise 3.6 km across mapped to 0, flat, through 1, hilly: about a sixth of the land is flat, a quarter hilly); hills of three sizes
+  (950, 475 and 240 blocks across) of `58 * (0.2 + 0.8 * character) * (0.6 + 0.4 * wetness)` blocks; none under 2 blocks of height and fully from 30, none where the relief is over 120 to 450 m (mountains have their own),
+  and a hollow takes at most 55% of a point's height; *mesa* terraces (steps of 6.5 to 11.5 blocks, varying by region, rounded) in dry hilly country; *dunes* (4.5 blocks, long ridges 85 apart across, 300 along, of a regional
+  direction) on dry, flat, inland lowland. The calibration was by the probe: amplitude 34, shape 2 gave plains 15; 48 gave 22; 58 and 950 blocks gave 24 to 36.
+* **The biome source reads the same fields.** `World.hilliness` is the character; lowland erosion falls by 0.38 over a character of 0.70 to 0.95 (to about -0.13, vanilla's third band); `BiomeClimate.climateRain` maps the
+  continent's rain (middle 650 mm, a wet place 1,100) onto the 1,000 mm the climate calls neutral at 1.85 mm to the mm, and `rainbias` is 0.8. Hills 0 gives no hill country in the biomes either.
+* **Result**: height range within 512 blocks, medians, Earth seeds 4242 / 6258605606326987467: plains 25 / 32, forest 26 / 32, taiga 24 / 34, savanna 27 / 33, jungle 22 / 32, desert 22 / 27, meadow 30 / 35, swamp 13 (flat marsh);
+  all land 28 / 34 (vanilla 49). The walk: median 640 m, 90th percentile 2.9 / 2.8 km. Shares on seed 4242 against 1.2.0 (of the window): plains 10.1 to 6.5%, forest 9.3 to 7.8%, dark forest 0.9 to 2.3%, jungle 0.9 to 1.5%,
+  old-growth taiga 0.5 to 1.2%, taiga 2.8 to 3.8%, desert 1.2 to 1.0%; every biome, every placed feature and every structure still occurs (`VanillaCoverageProbeTest`). `HillsTest`, `EarthBiomeClimateTest` and the detail
+  tests cover it; `HillsPreviewTest` draws a stretch with and without the hills (`-Depicterrain.hillsPreview=SEED,X,Z`).
+* **Not done:** the biome families do not each have a landform of their own (no jungle ridges, no tundra domes): the terrain does not see vanilla's temperature, which is in the biome source's noise, so the link is through
+  rain and region. A model-level climate would allow that, at the price of replacing vanilla's regional noise. The hills are noise and not erosion (they do not follow drainage, though the rivers' valleys part them).
 
 ## Design notes
 

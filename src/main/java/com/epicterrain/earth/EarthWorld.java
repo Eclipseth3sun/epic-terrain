@@ -233,6 +233,11 @@ public final class EarthWorld {
 		return this.grid(this.relief, this.modelX(wx), this.modelZ(wz));
 	}
 
+	/** The character of the land at a position, 0 for flat country through 1 for hill country (see {@link Hills}). */
+	public double hilliness(double wx, double wz) {
+		return this.detail.character(this.modelX(wx), this.modelZ(wz));
+	}
+
 	/** Rainfall in millimetres a year (a dry sea beyond the window). */
 	public double rainMm(double wx, double wz) {
 		return this.grid(this.continent.rain, this.modelX(wx), this.modelZ(wz));

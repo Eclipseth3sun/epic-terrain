@@ -32,7 +32,7 @@ public final class BiomeClimate {
 	 */
 	public record Dials(double lapse, double rainBias, double variety) {
 		public static Dials defaults() {
-			return new Dials(0.3, 0.5, 0.5);
+			return new Dials(0.3, 0.8, 0.5);
 		}
 
 		public static Dials fromProperties() {
@@ -80,6 +80,8 @@ public final class BiomeClimate {
 	private static final double SHATTER_THRESHOLD = 0.50;
 	private static final double ROCKY_COAST_THRESHOLD = 0.08;
 	private static final double BARE_SUMMIT_THRESHOLD = 0.15;
+	/** How much lower the erosion of the lowland is in hill country. */
+	private static final double HILLY_EROSION = 0.38;
 
 	/** Real relief above the surrounding base level, in metres, where each band begins. */
 	public static final double FOOTHILLS_M = 300.0;
@@ -133,6 +135,21 @@ public final class BiomeClimate {
 	 */
 	public static void cell(double heightM, double reliefM, double rainMm, double coastBlocks, boolean river, double t0, double h0, double w0, double wx, double wz,
 			long seed, Dials d, Cell out) {
+		cell(heightM, reliefM, rainMm, coastBlocks, river, t0, h0, w0, wx, wz, seed, 0.0, d, out);
+	}
+
+	/**
+	 * The rainfall of the simulated continent as the climate wants it: the continent is dry (the middle of its land is some 500 to 650 mm a year, and a wet place 1,100), and
+	 * {@link #cell} takes 1,000 mm as neither wet nor dry, so the continent's own range is stretched over the one the climate works in. Deserts then lie in the rain shadows
+	 * and forests and jungles on the wet windward ground, as the simulation put the rain, and not as the vanilla noise alone had them.
+	 */
+	public static double climateRain(double simulatedMm) {
+		return Math.max(0.0, 1000.0 + 1.85 * (simulatedMm - 650.0));
+	}
+
+	/** @param hilliness the character of the land, 0 for flat country through 1 for hill country (see {@link Hills}); the lowland of hill country has the erosion of vanilla's hills */
+	public static void cell(double heightM, double reliefM, double rainMm, double coastBlocks, boolean river, double t0, double h0, double w0, double wx, double wz,
+			long seed, double hilliness, Dials d, Cell out) {
 		double sign = w0 < 0.0 ? -1.0 : 1.0;
 		double wet = Noise.clamp((rainMm - 1000.0) / 1200.0, -1.0, 1.0);
 		out.humidity = Noise.clamp(h0 + d.rainBias() * 0.6 * wet, -1.0, 1.0);
@@ -161,7 +178,9 @@ public final class BiomeClimate {
 		double magnitude;
 		if (edge < FOOTHILLS_M) {
 			zone = LOWLAND;
-			erosion = 0.25 + 0.08 * wander;
+			// hill country has the erosion of vanilla's hills (an erosion of -0.13 is its third band, not its fourth), which is where its table has the badlands and mesas of the hot
+			// in place of the desert, and the plateau biomes of the far inland; flat country keeps the fourth band, its plains
+			erosion = 0.25 + 0.08 * wander - HILLY_EROSION * Noise.smooth(0.70, 0.95, hilliness);
 			magnitude = 0.40 + 0.08 * swing;
 		} else if (edge < MONTANE_M) {
 			zone = FOOTHILLS;
@@ -261,7 +280,7 @@ public final class BiomeClimate {
 			for (int x = 0; x < c.nx; x++) {
 				int i = z * c.nx + x;
 				int k = (z >> 1) * cnx + (x >> 1);
-				cell(c.height[i], relief[i], c.rain[i], coast[i], c.river[i], t[k], h[k], w[k], c.x0 + x * c.cell, c.z0 + z * c.cell, seed, dials, cell);
+				cell(c.height[i], relief[i], climateRain(c.rain[i]), coast[i], c.river[i], t[k], h[k], w[k], c.x0 + x * c.cell, c.z0 + z * c.cell, seed, dials, cell);
 				result.temperature[i] = (float) cell.temperature;
 				result.humidity[i] = (float) cell.humidity;
 				result.relief[i] = relief[i];

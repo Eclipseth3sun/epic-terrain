@@ -51,15 +51,16 @@ class EarthDetailTest {
 
 	@Test
 	void noCragLeavesTheGroundSmooth() {
-		Detail d = new Detail(CONTINENT, new Detail.Dials(0.0));
+		Detail d = new Detail(CONTINENT, new Detail.Dials(0.0, 0.0));
 		for (double[] p : mountainPoints(600.0, 200)) {
 			assertEquals(d.smoothBlocks(p[0], p[1]), d.blocks(p[0], p[1]), 0.0);
 		}
 	}
 
 	@Test
-	void plainsShoresAndTheSeaFloorAreLeftAlone() {
-		Detail d = new Detail(CONTINENT, Detail.Dials.defaults());
+	void plainsShoresAndTheSeaFloorAreLeftAloneByTheFineDetail() {
+		// (the lowland's rolling hills are another layer, tested with them: here they are off)
+		Detail d = new Detail(CONTINENT, new Detail.Dials(1.0, 0.0));
 		Random random = new Random(11);
 		int plains = 0;
 		int sea = 0;

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+* **Rolling hills in the lowland, by region.** Biomes used to change over ground that stayed flat for miles: in the seeds measured the height range within 512 blocks was 8 to 15 blocks under plains, forests, taiga,
+  jungle and savanna (vanilla's is 46 to 49), and one could walk 5 km before the ground had changed by 20 blocks (vanilla's 90th percentile is 0.8 km). Flat, rolling and hill country now follow one another over
+  kilometres, dry land rolls less than wet (and the driest, flattest land has low dunes), and dry hill country is terraced into mesas. Now 22 to 35 blocks within 512 blocks, about two thirds of vanilla's, and the
+  90th percentile of the walk is 2.8 to 2.9 km. Hills part round rivers and lakes (their valleys and basins stay level) and are left off the shore and the mountains; the coasts, ranges, rivers and tallest
+  peaks are as they were. New option `-Depicterrain.earth.hills=` (1 by default; 0 is the flat lowland, 2 twice the hills).
+* **The biomes follow the same regions and the simulated rain.** Hill country has the erosion of vanilla's hills, so in the hot it is badlands where flat country is desert, and in the far inland the plateau biomes
+  come with it; humidity leans harder on the simulated rain (`rainbias` is 0.8, was 0.5, and the continent's dry range is stretched over the one the climate works in), so deserts lie in rain shadows and
+  forests, dark forests, jungles and old-growth taiga on the wet ground, as the simulation put the rain.
+* **Existing Earth worlds will show seams** where new chunks meet old ones (the ground by up to some tens of blocks in the lowland, and the biomes in many places). A new world is not affected.
+
 ## 1.2.0
 
 * **Flooded swamps and marshes.** Low, flat land near the sea and the rivers is now marsh: its ground stands at the sea level with pools and hummocks of some 40 blocks, about a third of it water (what

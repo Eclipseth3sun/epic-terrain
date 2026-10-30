@@ -17,15 +17,23 @@ package com.epicterrain.earth;
  * Pure, and a function of position only, so any chunk can ask for any column and neighbours agree.
  */
 public final class Detail {
-	/** @param crag how strong the fine relief is: 0 leaves the ground smooth, 1 is the default, 2 is twice as craggy */
-	public record Dials(double crag) {
+	/**
+	 * @param crag  how strong the fine relief is: 0 leaves the ground smooth, 1 is the default, 2 is twice as craggy
+	 * @param hills how much the lowland rolls (see {@link Hills}): 0 is as flat as the simulation made it, 1 is the default, 2 is twice the hills
+	 */
+	public record Dials(double crag, double hills) {
+		public Dials(double crag) {
+			this(crag, 1.0);
+		}
+
 		public static Dials defaults() {
-			return new Dials(1.0);
+			return new Dials(1.0, 1.0);
 		}
 
 		public static Dials fromProperties() {
-			String value = System.getProperty("epicterrain.earth.crag");
-			return new Dials(value == null ? 1.0 : Double.parseDouble(value));
+			String crag = System.getProperty("epicterrain.earth.crag");
+			String hills = System.getProperty("epicterrain.earth.hills");
+			return new Dials(crag == null ? 1.0 : Double.parseDouble(crag), hills == null ? 1.0 : Double.parseDouble(hills));
 		}
 	}
 
@@ -53,8 +61,15 @@ public final class Detail {
 	private final Continent continent;
 	private final float[] relief;
 	private final float[] nearRiver;
+	/** Beside a river: 1 on it, falling over some 6 cells, so that the hills part round a valley. */
+	private final float[] nearRiverWide;
+	/** The hills of the lowland, in blocks above or below the simulated ground, at each cell; and how much of each cell is dunes; and the character of the region (0 flat, 1 hilly). */
+	private final float[] hillBlocks;
+	private final float[] dunes;
+	private final float[] character;
 	private final long seed;
 	private final double crag;
+	private final double hills;
 
 	public Detail(Continent continent, Dials dials) {
 		this.continent = continent;
@@ -80,6 +95,67 @@ public final class Detail {
 			spread = next;
 		}
 		this.nearRiver = spread;
+		// the hills part round the water as they do round a river: the ground of a lake's basin and of a river's valley is the water's to settle
+		float[] wide = rivers.clone();
+		for (int i = 0; i < n; i++) {
+			if (continent.lakeDepth[i] > 0.0f) {
+				wide[i] = 1.0f;
+			}
+		}
+		for (int pass = 0; pass < 6; pass++) {
+			float[] next = wide.clone();
+			for (int z = 1; z < continent.nz - 1; z++) {
+				for (int x = 1; x < continent.nx - 1; x++) {
+					int i = z * continent.nx + x;
+					float around = Math.max(Math.max(wide[i - 1], wide[i + 1]), Math.max(wide[i - continent.nx], wide[i + continent.nx]));
+					next[i] = Math.max(wide[i], 0.8f * around);
+				}
+			}
+			wide = next;
+		}
+		this.nearRiverWide = wide;
+		this.hills = dials.hills();
+		this.hillBlocks = new float[n];
+		this.dunes = new float[n];
+		this.character = new float[n];
+		for (int z = 0; z < continent.nz; z++) {
+			for (int x = 0; x < continent.nx; x++) {
+				int i = z * continent.nx + x;
+				double wx = continent.x0 + x * continent.cell;
+				double wz = continent.z0 + z * continent.cell;
+				double ch = Hills.character(this.seed, wx, wz);
+				this.character[i] = (float) ch;
+				double metres = continent.height[i];
+				if (metres <= 0.0 || this.hills <= 0.0) {
+					continue;
+				}
+				double base = Continent.blocksAbove(metres);
+				this.hillBlocks[i] = (float) Hills.offset(this.seed, wx, wz, base, this.relief[i], continent.rain[i], ch, this.hills);
+				this.dunes[i] = (float) Hills.dunes(base, this.relief[i], continent.rain[i], ch, this.hills);
+			}
+		}
+	}
+
+	/** The character of the land at a position, 0 for flat country through 1 for hill country (see {@link Hills}); the biome mapping reads it as well as the ground. */
+	public double character(double wx, double wz) {
+		if (this.hills <= 0.0) {
+			return 0.0; // no hills, no hill country
+		}
+		return Noise.clamp(this.smooth(this.character, wx, wz), 0.0, 1.0);
+	}
+
+	/** The rolling hills and dunes of the lowland at a position, in blocks. */
+	private double hillsAt(double wx, double wz) {
+		if (this.hills <= 0.0) {
+			return 0.0;
+		}
+		double offset = this.smooth(this.hillBlocks, wx, wz);
+		double dune = Noise.clamp(this.smooth(this.dunes, wx, wz), 0.0, 1.0);
+		if (dune > 0.01) {
+			offset += Hills.DUNE_HEIGHT * dune * Hills.duneRidge(this.seed, wx, wz);
+		}
+		double river = 1.0 - Noise.smooth(0.05, 0.75, Noise.clamp(this.smooth(this.nearRiverWide, wx, wz), 0.0, 1.0));
+		return offset * river;
 	}
 
 	private static double catmull(double a, double b, double c, double d, double t) {
@@ -119,6 +195,7 @@ public final class Detail {
 		if (metres <= 0.0) {
 			return base; // the sea floor is left smooth
 		}
+		base += this.hillsAt(wx, wz);
 		double relief = Math.max(0.0, this.smooth(this.relief, wx, wz));
 		double rugged = Noise.smooth(RELIEF_FROM, RELIEF_FULL, relief);
 		double shore = Noise.smooth(2.0, 45.0, metres);

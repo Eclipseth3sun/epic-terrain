@@ -37,7 +37,7 @@ import net.minecraft.world.level.levelgen.presets.WorldPreset;
 class BiomeGapPreviewTest {
 	private static final LevelHeightAccessor WORLD = LevelHeightAccessor.create(-64, 576);
 
-	private static Color colour(String id, double ground) {
+	static Color colour(String id, double ground) {
 		return switch (id) {
 			case "swamp" -> new Color(86, 96, 30);
 			case "mangrove_swamp" -> new Color(150, 40, 60);
