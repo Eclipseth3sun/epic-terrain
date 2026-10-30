@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 * **Rolling hills in the lowland, by region.** Biomes used to change over ground that stayed flat for miles: in the seeds measured the height range within 512 blocks was 8 to 15 blocks under plains, forests, taiga,
   jungle and savanna (vanilla's is 46 to 49), and one could walk 5 km before the ground had changed by 20 blocks (vanilla's 90th percentile is 0.8 km). Flat, rolling and hill country now follow one another over
