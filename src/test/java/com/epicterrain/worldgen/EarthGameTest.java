@@ -410,6 +410,117 @@ class EarthGameTest {
 		assertTrue(agree * 100 >= checked * 90, "the real chunks flood where the model says: " + agree + " of " + checked + " columns agree");
 	}
 
+	/** The blocks of a few chunks as one place to look in, for the water at a chunk's edge: what the world generation region is to the generator. */
+	private static final class Neighbourhood implements net.minecraft.world.level.BlockGetter {
+		private final Map<Long, ProtoChunk> chunks = new HashMap<>();
+
+		@Override
+		public net.minecraft.world.level.block.entity.BlockEntity getBlockEntity(BlockPos pos) {
+			return null;
+		}
+
+		@Override
+		public BlockState getBlockState(BlockPos pos) {
+			ProtoChunk chunk = this.chunks.get(ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4));
+			return chunk == null ? Blocks.AIR.defaultBlockState() : chunk.getBlockState(pos);
+		}
+
+		@Override
+		public net.minecraft.world.level.material.FluidState getFluidState(BlockPos pos) {
+			return this.getBlockState(pos).getFluidState();
+		}
+
+		@Override
+		public int getHeight() {
+			return WORLD.getHeight();
+		}
+
+		@Override
+		public int getMinY() {
+			return WORLD.getMinY();
+		}
+	}
+
+	/** Builds the 3 x 3 chunks round a chunk, and returns where to look in them. */
+	private Neighbourhood around(int chunkX, int chunkZ) {
+		Neighbourhood n = new Neighbourhood();
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				n.chunks.put(ChunkPos.pack(chunkX + dx, chunkZ + dz), build(chunkX + dx, chunkZ + dz));
+			}
+		}
+		return n;
+	}
+
+	@Test
+	void waterAtAStepOfARiverIsMarkedForTheFluidUpdate() {
+		// a river's water level steps down along it and the source block at the top of a step stands beside air; nothing marked such water, so it stayed where it was until
+		// something next to it changed (in a world played for a while, 1,919 blocks in 377 chunks). Chunks with an elevated river in them:
+		double[] window = world.window();
+		double[] out = new double[3];
+		List<int[]> where = new ArrayList<>();
+		Set<Long> seen = new HashSet<>();
+		for (int x = (int) window[0] + 64; x < window[1] - 64 && where.size() < 60; x += 40) {
+			for (int z = (int) window[2] + 64; z < window[3] - 64 && where.size() < 60; z += 40) {
+				world.sampleBlock(x, z, out);
+				if (out[2] == EarthWorld.RIVER && out[1] > 4.0 && seen.add(ChunkPos.pack(x >> 4, z >> 4))) {
+					where.add(new int[] { x >> 4, z >> 4 });
+				}
+			}
+		}
+		assertTrue(where.size() >= 10, "the test window has elevated rivers: " + where.size());
+		int unsettled = 0;
+		int checked = 0;
+		int missed = 0;
+		for (int[] c : where) {
+			Neighbourhood n = around(c[0], c[1]);
+			ProtoChunk chunk = n.chunks.get(ChunkPos.pack(c[0], c[1]));
+			List<BlockPos> blocks = FluidSettling.unsettled(chunk, n);
+			unsettled += blocks.size();
+			assertEquals(blocks.size(), FluidSettling.mark(chunk, n), "mark marks what was found");
+			for (BlockPos pos : blocks) {
+				checked++;
+				assertTrue(chunk.getBlockState(pos).is(Blocks.WATER), "water");
+				short packed = ProtoChunk.packOffsetCoordinates(pos);
+				if (!chunk.getPostProcessing()[chunk.getSectionIndex(pos.getY())].contains(packed)) {
+					missed++;
+				}
+			}
+		}
+		System.out.printf("fluid settling: %d elevated-river chunks, %d water blocks with air beside or under them, all marked for the fluid update%n", where.size(), unsettled);
+		assertTrue(unsettled > 0, "such water is there to find: " + unsettled);
+		assertEquals(0, missed, "every one of them is in the post-processing of its chunk (" + checked + " checked)");
+	}
+
+	@Test
+	void theSeaIsAtRestAndSettlingLeavesItAlone() {
+		double[] window = world.window();
+		int chunkX = ((int) window[1] + 6_000) >> 4;
+		Neighbourhood n = around(chunkX, 0);
+		ProtoChunk sea = n.chunks.get(ChunkPos.pack(chunkX, 0));
+		assertEquals(List.of(), FluidSettling.unsettled(sea, n), "the sea's water is level and has nothing beside it: nothing to settle");
+		boolean any = false;
+		for (int y = 0; y < 62 && !any; y++) {
+			any = sea.getBlockState(new BlockPos(chunkX * 16 + 8, y, 8)).is(Blocks.WATER);
+		}
+		assertTrue(any, "and it is water");
+	}
+
+	@Test
+	void settlingCanBeSwitchedOff() {
+		double[] window = world.window();
+		int[] c = { ((int) window[1] + 6_000) >> 4, 0 };
+		Neighbourhood n = around(c[0], c[1]);
+		System.setProperty("epicterrain.earth.settle", "false");
+		try {
+			assertEquals(0, FluidSettling.mark(n.chunks.get(ChunkPos.pack(c[0], c[1])), n));
+			assertTrue(!FluidSettling.enabled());
+		} finally {
+			System.clearProperty("epicterrain.earth.settle");
+		}
+		assertTrue(FluidSettling.enabled());
+	}
+
 	@Test
 	void realChunksAreBuiltWithTheModelsGroundWaterAndSurface() {
 		double[] window = world.window();

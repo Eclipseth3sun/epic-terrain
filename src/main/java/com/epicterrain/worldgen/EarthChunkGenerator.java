@@ -16,6 +16,7 @@ import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -91,6 +92,17 @@ public final class EarthChunkGenerator extends NoiseBasedChunkGenerator {
 			WorldGenRegion region, Set<Holder<Biome>> carverBiomes) {
 		this.bind(randomState);
 		return super.buildTerrain(chunk, blender, randomState, structureManager, biomeManager, region, carverBiomes);
+	}
+
+	/**
+	 * Vanilla's decoration, then the settling of the water: by now the chunk is carved and has its surface, and the chunks round it have their blocks, so every block of
+	 * water that has air beside it or under it can be found, across chunk edges too, and marked for the fluid update the game gives the chunk when it is full (see
+	 * {@link FluidSettling}).
+	 */
+	@Override
+	public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
+		super.applyBiomeDecoration(level, chunk, structureManager);
+		FluidSettling.mark(chunk, level);
 	}
 
 	@Override

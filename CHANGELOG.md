@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+* **Water settles.** In testing there were many water source blocks standing still that began to flow as soon as one was updated: the water of rivers, lakes and crater lakes (which stands at a level of its own
+  above the sea) was never marked for the fluid update that vanilla gives the water it places, so a river's water stepped down from column to column with a source block beside air at each step, and a lake's
+  one-block surface could hang over a cave the carvers had opened under it. In a world played for a while there were 2,136 such blocks in 377 chunks (counting only neighbours in the same chunk; 1,919 of them
+  above the sea, most at the height of one high lake). New chunks now have every block of water that has air beside it or under it marked for that update, once the chunk is carved and decorated, so the game
+  settles it when the chunk is full: a step of a river becomes a small fall, a lake over a cave drains into it. `-Depicterrain.earth.settle=false` turns it off. Chunks generated before this are not changed.
+* A script, `tools/worldmap/scan_water.py`, counts the water in a saved world that would flow if it were updated, so a world can be checked.
+
 ## 1.3.0
 
 * **Rolling hills in the lowland, by region.** Biomes used to change over ground that stayed flat for miles: in the seeds measured the height range within 512 blocks was 8 to 15 blocks under plains, forests, taiga,

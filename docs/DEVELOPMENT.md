@@ -33,6 +33,7 @@ it, and the few constants it has sit in the `TUNE` block at the top. Vanilla fun
 | `EarthChunkGenerator`, `EarthFluidPicker` | `worldgen/` | vanilla's noise generator with the water level asked of the model column by column |
 | `EarthBiomeSource` | `worldgen/` | vanilla's multi-noise table asked about the model's numbers, the three island biomes, and the cave biomes underground |
 | `SearchBudget` | `worldgen/` | the 5-second limit on `/locate` and the other searches |
+| `FluidSettling` | `worldgen/` | marks the water that has air beside or under it for the fluid update, once a chunk is decorated, so that river steps and lakes over caves flow instead of standing still |
 | `NoiseBasedAquiferMixin` | `mixin/` | keeps vanilla's aquifers below the ground so that rivers above the sea keep their water |
 | `epicterrain.accesswidener` | resources | makes `NoiseBasedChunkGenerator` extendable (vanilla marks it final) |
 
@@ -606,6 +607,28 @@ dial; about two thirds of vanilla's roughness).
   tests cover it; `HillsPreviewTest` draws a stretch with and without the hills (`-Depicterrain.hillsPreview=SEED,X,Z`).
 * **Not done:** the biome families do not each have a landform of their own (no jungle ridges, no tundra domes): the terrain does not see vanilla's temperature, which is in the biome source's noise, so the link is through
   rain and region. A model-level climate would allow that, at the price of replacing vanilla's regional noise. The hills are noise and not erosion (they do not follow drainage, though the rivers' valleys part them).
+
+### Water that does not settle (2026-10-30)
+
+The user's report: in testing there were quite a few water source blocks that were stationary and not flowing, which began to flow if the block was updated; "we should build a fluid settling script to prevent this".
+
+* **How big, in the world they played** (`tools/worldmap/scan_water.py` on `New World`, 22,387 fully generated chunks with water, 8,943,747 water source blocks): 5,276 sources had air beside them or under them in the same chunk,
+  of which 3,140 already had a fluid tick scheduled (vanilla's aquifer water, which is marked) and 2,136, in 377 chunks, did not. 217 of the 2,136 were at or under the sea (the aquifers' and carvers' own leftovers),
+  1,919 above it, 1,763 of those between y 121 and 200 and a third of them within a block or two of y 123 to 132 (one high lake and its rivers). A side view of the worst chunks showed the two shapes: a one-block lake
+  surface at y 130 over air at y 129 (the carvers had opened a cave under the lake's bed), and a river's surface at y 123 stepping down with a source beside the air above the lower column. 1,637 of the 2,136 had air
+  at the side and 1,201 under them (some both). Only the neighbours in the same chunk were looked at, so these are floors.
+* **Why.** Vanilla's sea is one level of water, which is stable; the water of its aquifers and carvers is marked for post-processing (`markPosForPostProcessing`), which gives each block a fluid update when the chunk becomes full.
+  `EarthFluidPicker` gives any column a level of its own, and the fill that places it does not mark it (`shouldScheduleFluidUpdate` is false for the global fluid picker's water, which is right for a sea).
+* **The fix (`FluidSettling`).** `EarthChunkGenerator.applyBiomeDecoration` runs vanilla's decoration, then looks at every water block from y 60 up in the sections that have water, and marks each that has air at any of its four
+  sides or under it. Why there: by the decoration step the chunk is carved and has its surface, and the chunks round it have their blocks (the step needs them at the carving status), so a block at the edge of a chunk can look
+  across; the marks persist in the chunk's post-processing until it is full. The game then ticks each marked block as the chunk becomes full: a source beside lower air spreads into it (a step of a river is a small fall),
+  a source over air falls (a lake over a cave drains into the cave, as vanilla's would), and the rest, which was already at rest, does nothing. The open sea has nothing to mark (checked). Cost: a scan of the sections that have
+  water, a few thousand block reads for a chunk with a lake; a chunk with a river has some tens of blocks marked (68 on average in the 60 elevated-river chunks of the test window, at the terrain step, before carving).
+* **Not done.** Chunks made before this keep their still water (a settle at chunk load, with the same scan, would fix them; it would also pour water into any cave under a lake in a world played for a long time, so it
+  was not done). The flow itself is the game's, and has not been seen in the launcher; the end state was reasoned from vanilla's rules and not simulated here. Water that flows out of a chunk edge into a chunk that is not
+  full yet is the game's to deal with, as for vanilla's own.
+* **Tests.** `EarthGameTest.waterAtAStepOfARiverIsMarkedForTheFluidUpdate` (60 chunks with elevated rivers: 4,090 blocks found, every one in the post-processing of its chunk), `theSeaIsAtRestAndSettlingLeavesItAlone`,
+  `settlingCanBeSwitchedOff`. To check a world after playing it: `python tools/worldmap/scan_water.py "<world>" out.json`, and look at `unsettled above sea`.
 
 ## Design notes
 
