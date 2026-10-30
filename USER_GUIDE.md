@@ -1,6 +1,6 @@
 # Tectonic Terrain: user guide
 
-Tectonic Terrain 1.3.0 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
+Tectonic Terrain 1.3.1 is a Fabric mod for **Minecraft Java Edition 26.3**. It adds one world type next to vanilla's (Default, Superflat, Amplified and the rest are unchanged): **Earth**.
 (The mod was called Epic Terrain until it was renamed. Its id and jar name, `epicterrain`, are unchanged.)
 
 An Earth world is a procedural continent. It is simulated from plate tectonics, rock layers, erosion and climate, so mountain belts, rivers that run from the mountains to the sea, lakes, coasts and
@@ -20,7 +20,7 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 |---|---|---|
 | Fabric Loader | 0.20.1 or newer | [Fabric installer](https://fabricmc.net/use/installer/) |
 | Fabric API | 0.165.0+26.3 (the version this mod is built against; newer 26.3 builds should work but were not tried) | [Modrinth: Fabric API](https://modrinth.com/mod/fabric-api) |
-| Tectonic Terrain | 1.3.0 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.3.0.jar`) |
+| Tectonic Terrain | 1.3.1 | [GitHub Releases](https://github.com/Eclipseth3sun/epic-terrain/releases) (`epicterrain-1.3.1.jar`) |
 
 **Optional, for better graphics and a far view.** These versions were checked against Modrinth's lists for 26.3 on 2026-10-28.
 
@@ -33,13 +33,13 @@ Minecraft versions move fast and mods are tied to them, so use exactly these. Ev
 
 **What has been tried.** The author played an Earth world in the real launcher in early-game survival: tamed a horse and rode about 15,000 blocks across the plains to the mountains, with Fabric API
 0.165.0+26.3, Sodium 0.9.2, Iris 1.11.7, Distant Horizons 3.3.4 and the shader pack Complementary Reimagined r5.7.1. Voxy, dedicated servers and other worldgen mods have **not** been tried, and the caves
-have had little play. The marshes and other biomes new in 1.2.0 and the rolling hills new in 1.3.0 have been checked headlessly (biome maps, real chunks, generated structure starts) but not played. Nothing above is a guarantee for your machine; if something does not work, see [reporting problems](#reporting-problems).
+have had little play. The marshes and other biomes new in 1.2.0, the rolling hills new in 1.3.0 and the water settling new in 1.3.1 have been checked headlessly (biome maps, real chunks, generated structure starts) but not played. Nothing above is a guarantee for your machine; if something does not work, see [reporting problems](#reporting-problems).
 
 ## Installing
 
 1. **Install Fabric** for Minecraft 26.3 with the [Fabric installer](https://fabricmc.net/use/installer/): pick 26.3 and loader 0.20.1 or newer, and let it create a launcher profile.
 2. **Open your mods folder.** Windows: `%APPDATA%\.minecraft\mods` (create it if it is not there). macOS: `~/Library/Application Support/minecraft/mods`. Linux: `~/.minecraft/mods`.
-3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.3.0.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
+3. **Put the jars in it:** `fabric-api-0.165.0+26.3.jar` and `epicterrain-1.3.1.jar`, plus any optional mods from the table above. Remove older jars of this mod (`epicterrain-*.jar`) so there is only one.
 4. **Give the game memory** (recommended with Distant Horizons, and harmless without it). In the launcher, open the Fabric profile, then **More options** (or **Edit**) and in **JVM arguments** change
    `-Xmx2G` to `-Xmx6G` or more if your computer has the memory. The Earth world itself needs little (a full test of its simulation fits in 2 GB), but Distant Horizons keeps a lot.
 5. **Start the game** with the Fabric profile. The log (`.minecraft/logs/latest.log`) should contain the line `Tectonic Terrain loaded`.
@@ -155,6 +155,7 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | `riverDepth`, `floodplain` | 1, 1 | Multiply the depth of every river and the width of every floodplain. |
 | `lapse`, `rainbias`, `variety` | 0.3, 0.8, 0.5 | How fast the climate cools with height; how far the simulated rainfall moves humidity (0 is pure vanilla, 1 is fully); how much the edges of the biome zones wander, and how common the windswept, rocky-coast and bare-summit patches are (0 is clean zones and none of them, 1 is a lot). |
 | `wetland` | 1 | How much of the low, flat land is marsh (swamp and mangrove swamp): 0 is none, 2 is more. |
+| `settle` | true | Whether the water of new chunks is made to settle (see below): `false` turns it off. |
 | `mushroom`, `volcanic`, `islandSize` | 4.1, 1, 1 | Mushroom islands per 1,000 km² of open ocean (4.1 is about vanilla's rate); a multiplier on how common volcanic islands are; a multiplier on the size of every island. |
 | `locateSeconds` | 5 | How long a `/locate` search may run before it gives up. |
 
@@ -169,6 +170,7 @@ The Earth world can be changed with startup options. Add them to the launcher pr
 | Distant Horizons fills in slowly. | It is generating real chunks through the Earth model; give it time, or lower its quality settings. |
 | A shader pack shows no distant terrain. | The pack probably does not support Distant Horizons. Try another pack, or turn Distant Horizons off. |
 | New chunks do not match old ones. | The options or the mod version differ from when the world was made (see [seeds](#seeds-saving-and-updating)). Version 1.1.0 curved the rock-layer bands, so an Earth world made with 1.0.0 shows a seam in the plains where new chunks begin; the options above set the 1.0.0 pattern back. Version 1.2.0 added marshes and moved the biomes of many places, so a world made with 1.1.1 or earlier shows seams where new chunks begin (the biomes change, and the ground by a few blocks in marsh country); `-Depicterrain.earth.wetland=0` leaves the ground as it was, but not the biomes. Version 1.3.0 added the lowland's rolling hills (its ground changes by up to some tens of blocks) and moved the biomes again, so a world made with 1.2.0 or earlier shows seams where new chunks begin; `-Depicterrain.earth.hills=0` leaves the ground as it was, but not the biomes, which follow the simulated rain more strongly. |
+| Water that stands still where it should flow (a river's water in steps, a lake over a cave), which flows as soon as a block next to it changes. | Water at a level of its own (rivers, lakes) was not set to flow when a chunk was made, in versions before 1.3.1. Chunks made with 1.3.1 or later have it set, so that the game settles it when the chunk loads; chunks made before keep the still water. `tools/worldmap/scan_water.py` counts it in a saved world. |
 | An Earth world made with version 0.2.0 has no caves in the parts you explored before. | 0.2.0 had no caves; 1.0.0 puts caves in newly generated chunks only. |
 
 ## Known limitations
@@ -181,10 +183,12 @@ The Earth world can be changed with startup options. Add them to the launcher pr
   pieces have been seen in play; the cave decoration and dedicated servers have not been tried, and the classic carvers and the underground have had little play.
 * No glaciers or snowfields beyond what vanilla's biomes give; badlands appear only where the climate reaches them. The windswept savanna is rare (a tenth of a percent of the land, against vanilla's third),
   and a marsh's edge follows the lie of the ground, so it is a shore and not a fade.
+* The water of a new chunk is settled by the game as the chunk loads (a step of a river becomes a small fall, a lake over a cave drains into it); this has been checked on generated chunks and on a scan of a played world, and
+  not watched in the launcher, and chunks made before 1.3.1 keep their still water.
 * The biome families do not each have a landform of their own (no jungle ridges or tundra domes): the hills follow the region and the rain, and not each biome.
 
 ## Reporting problems
 
-Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.3.0), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
+Open an issue at [github.com/Eclipseth3sun/epic-terrain/issues](https://github.com/Eclipseth3sun/epic-terrain/issues) and include: the mod version (1.3.1), your Minecraft, Fabric Loader, Fabric API and any other mod versions,
 what world type and seed, what you did, and the end of `.minecraft/logs/latest.log` (and the file in `.minecraft/crash-reports` if the game crashed). For terrain you think looks wrong, a screenshot with F3
 open and the coordinates is the most useful thing. How the mod works inside, and what has been measured, is in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

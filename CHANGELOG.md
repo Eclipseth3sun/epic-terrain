@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.1
 
 * **Water settles.** In testing there were many water source blocks standing still that began to flow as soon as one was updated: the water of rivers, lakes and crater lakes (which stands at a level of its own
   above the sea) was never marked for the fluid update that vanilla gives the water it places, so a river's water stepped down from column to column with a source block beside air at each step, and a lake's
